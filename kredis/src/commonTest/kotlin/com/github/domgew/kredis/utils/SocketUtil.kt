@@ -53,8 +53,7 @@ internal object SocketUtil {
     ): AutoCloseable {
         override fun close() {
             runBlocking {
-                socket.close()
-                socket.awaitClosed()
+                socket.dispose()
             }
         }
     }

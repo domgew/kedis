@@ -28,3 +28,8 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "kredis"
+
+include(
+    ":kredis",
+    ":example",
+)

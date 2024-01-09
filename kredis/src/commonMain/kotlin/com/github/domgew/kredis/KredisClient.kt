@@ -20,7 +20,7 @@ public interface KredisClient: AutoCloseable {
 
     public val isConnected: Boolean
     public suspend fun connect()
-    public suspend fun closeAsync()
+    public suspend fun closeSuspended()
 
     /**
      * Sends a message to the server which should be returned unchanged.

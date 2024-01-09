@@ -8,7 +8,6 @@ import io.ktor.network.selector.SelectorManager
 import io.ktor.network.sockets.InetSocketAddress
 import io.ktor.network.sockets.Socket
 import io.ktor.network.sockets.aSocket
-import io.ktor.network.sockets.awaitClosed
 import io.ktor.network.sockets.openReadChannel
 import io.ktor.network.sockets.openWriteChannel
 import io.ktor.utils.io.ByteReadChannel
@@ -64,8 +63,7 @@ internal abstract class AbstractKredisClient(
     }
 
     protected suspend fun doClose() {
-        _socket?.close()
-        _socket?.awaitClosed()
+        _socket?.dispose()
     }
 
     protected suspend fun executeCommand(

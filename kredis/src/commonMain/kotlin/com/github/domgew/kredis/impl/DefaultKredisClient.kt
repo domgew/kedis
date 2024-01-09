@@ -16,7 +16,7 @@ internal class DefaultKredisClient(
         ensureConnected()
     }
 
-    override suspend fun closeAsync() = lock.withLock {
+    override suspend fun closeSuspended() = lock.withLock {
         doClose()
     }
 
