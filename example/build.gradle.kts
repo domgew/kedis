@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+
 val kotlinLoggingVersion: String by project
 val ktorVersion: String by project
 
@@ -9,7 +12,7 @@ kotlin {
     jvm {
         withJava()
     }
-    linuxX64 {
+    addNativeTargets {
         binaries {
             executable {
                 entryPoint = "main"
@@ -34,5 +37,22 @@ kotlin {
                 implementation("ch.qos.logback:logback-classic:1.4.14")
             }
         }
+    }
+}
+
+fun KotlinMultiplatformExtension.addNativeTargets(
+    block: KotlinNativeTarget.() -> Unit,
+) {
+    linuxX64 {
+        block()
+    }
+    linuxArm64 {
+        block()
+    }
+    macosX64 {
+        block()
+    }
+    macosArm64 {
+        block()
     }
 }

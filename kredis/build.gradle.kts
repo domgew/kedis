@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+
 val bigNumVersion: String by project
 val kotlinCoroutinesVersion: String by project
 val kotlinLoggingVersion: String by project
@@ -5,6 +8,7 @@ val ktorVersion: String by project
 
 plugins {
     kotlin("multiplatform")
+    id("maven-publish")
 }
 
 group = "com.github.domgew"
@@ -16,12 +20,7 @@ kotlin {
     jvm {
         jvmToolchain(17)
     }
-    linuxX64 {
-        binaries {
-            sharedLib {}
-        }
-    }
-    linuxArm64{
+    addNativeTargets {
         binaries {
             sharedLib {}
         }
@@ -52,5 +51,28 @@ kotlin {
                 )
             }
         }
+    }
+}
+
+publishing {
+    repositories {
+        mavenLocal()
+    }
+}
+
+fun KotlinMultiplatformExtension.addNativeTargets(
+    block: KotlinNativeTarget.() -> Unit,
+) {
+    linuxX64 {
+        block()
+    }
+    linuxArm64 {
+        block()
+    }
+    macosX64 {
+        block()
+    }
+    macosArm64 {
+        block()
     }
 }
