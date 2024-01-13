@@ -1,6 +1,6 @@
-import com.github.domgew.kredis.KredisClient
-import com.github.domgew.kredis.KredisConfiguration
-import com.github.domgew.kredis.arguments.SyncOptions
+import com.github.domgew.kedis.KedisClient
+import com.github.domgew.kedis.KedisConfiguration
+import com.github.domgew.kedis.arguments.SyncOptions
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
@@ -23,8 +23,8 @@ fun commonMain() {
         factory = CIO,
         port = 8080,
     ) {
-        val redisClient = KredisClient.newClient(
-            configuration = KredisConfiguration(
+        val redisClient = KedisClient.newClient(
+            configuration = KedisConfiguration(
                 host = "127.0.0.1",
                 port = 6379,
                 connectionTimeoutMillis = 250,

@@ -27,9 +27,9 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "kredis"
+rootProject.name = "kedis"
 
 include(
-    ":kredis",
+    ":kedis",
     ":example",
 )
