@@ -1,6 +1,6 @@
 import io.github.domgew.kedis.KedisClient
 import io.github.domgew.kedis.KedisConfiguration
-import io.github.domgew.kedis.arguments.SyncOptions
+import io.github.domgew.kedis.arguments.SyncOption
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
@@ -41,7 +41,7 @@ fun commonMain() {
             route("/cache/flush") {
                 post {
                     redisClient.use {
-                        it.flushAll(sync = SyncOptions.SYNC)
+                        it.flushAll(sync = SyncOption.SYNC)
                     }
                 }
             }

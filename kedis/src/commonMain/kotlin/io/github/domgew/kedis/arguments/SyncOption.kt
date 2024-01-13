@@ -1,6 +1,6 @@
 package io.github.domgew.kedis.arguments
 
-public enum class SyncOptions {
+public enum class SyncOption {
     SYNC,
     ASYNC,
     ;
