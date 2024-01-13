@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
+import org.jetbrains.kotlin.konan.target.HostManager
 
 val bigNumVersion: String by project
 val kotlinCoroutinesVersion: String by project
@@ -11,7 +12,7 @@ plugins {
     id("maven-publish")
 }
 
-group = "com.github.domgew"
+group = "io.github.domgew"
 version = "0.0.1"
 
 kotlin {
@@ -54,6 +55,45 @@ kotlin {
 publishing {
     repositories {
         mavenLocal()
+    }
+}
+
+// smartPublish as per https://github.com/Dominaezzz/kotlin-sqlite/blob/master/build.gradle.kts
+afterEvaluate {
+    val publishTasks = tasks.withType<PublishToMavenRepository>()
+        .matching {
+            when {
+                HostManager.hostIsMingw ->
+                    it.name.startsWith("publishMingw")
+
+                HostManager.hostIsMac ->
+                    it.name.startsWith("publishMacos")
+
+                HostManager.hostIsLinux ->
+                    it.name.startsWith("publishLinux")
+                            || it.name.startsWith("publishJs")
+                            || it.name.startsWith("publishJvmPublication")
+                            || it.name.startsWith("publishMetadata")
+                            || it.name.startsWith("publishKotlinMultiplatform")
+
+                else -> throw Exception("unknown host")
+            }
+        }
+
+//    println("#####################################")
+//    println("overallPublishTasks:")
+//    for (task in tasks.withType<PublishToMavenRepository>()) {
+//        println("\t${task.name}")
+//    }
+//    println()
+//    println("platformPublishTasks:")
+//    for (task in publishTasks) {
+//        println("\t${task.name}")
+//    }
+//    println("#####################################")
+
+    tasks.register("smartPublish") {
+        dependsOn(publishTasks)
     }
 }
 

@@ -1,6 +1,6 @@
-import com.github.domgew.kedis.KedisClient
-import com.github.domgew.kedis.KedisConfiguration
-import com.github.domgew.kedis.arguments.SyncOptions
+import io.github.domgew.kedis.KedisClient
+import io.github.domgew.kedis.KedisConfiguration
+import io.github.domgew.kedis.arguments.SyncOptions
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall
