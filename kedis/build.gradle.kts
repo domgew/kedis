@@ -21,9 +21,6 @@ kotlin {
         jvmToolchain(17)
     }
     addNativeTargets {
-        binaries {
-            sharedLib {}
-        }
     }
 
     sourceSets {

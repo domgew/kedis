@@ -4,20 +4,8 @@
 /local.properties
 
 ### IntelliJ IDEA ###
-/.idea/modules.xml
-/.idea/jarRepositories.xml
-/.idea/compiler.xml
-/.idea/libraries/
-/.idea/gradle.xml
-/.idea/kotlinc.xml
-/.idea/misc.xml
-/.idea/vcs.xml
-/.idea/artifacts
-/.idea/uiDesigner.xml
-/.idea/migrations.xml
-*.iws
-*.iml
-*.ipr
+/.idea
+!/.idea/codeStyles
 
 ### Eclipse ###
 .apt_generated
