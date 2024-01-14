@@ -4,6 +4,7 @@ import io.github.domgew.kedis.KedisClient
 import io.github.domgew.kedis.KedisConfiguration
 import io.github.domgew.kedis.KedisException
 import io.github.domgew.kedis.commands.KedisCommand
+import io.github.domgew.kedis.commands.KedisFullCommand
 import io.ktor.network.selector.SelectorManager
 import io.ktor.network.sockets.InetSocketAddress
 import io.ktor.network.sockets.Socket
@@ -22,7 +23,6 @@ import kotlinx.coroutines.withTimeout
 internal abstract class AbstractKedisClient(
     protected val configuration: KedisConfiguration,
 ): KedisClient {
-    protected val lock = Mutex()
     private var _socket: Socket? = null
     private var _writeChannel: ByteWriteChannel? = null
     private var _readChannel: ByteReadChannel? = null
@@ -66,12 +66,29 @@ internal abstract class AbstractKedisClient(
         _socket?.dispose()
     }
 
+    protected suspend fun <T> executeCommand(
+        command: KedisFullCommand<T>,
+    ): T {
+        ensureConnected()
+
+        command.toRedisRequest()
+            .writeTo(_writeChannel!!)
+        _writeChannel!!.flush()
+
+        return command.fromRedisResponse(
+            response = RedisMessage.parse(_readChannel!!),
+        )
+    }
+
     protected suspend fun executeCommand(
         command: KedisCommand,
     ): RedisMessage {
         ensureConnected()
-        command.toRedisMessage().writeTo(_writeChannel!!)
+
+        command.toRedisRequest()
+            .writeTo(_writeChannel!!)
         _writeChannel!!.flush()
+
         return RedisMessage.parse(_readChannel!!)
     }
 }

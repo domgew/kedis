@@ -2,11 +2,23 @@ package io.github.domgew.kedis.impl
 
 import io.github.domgew.kedis.KedisConfiguration
 import io.github.domgew.kedis.KedisException
+import io.github.domgew.kedis.arguments.InfoSectionName
 import io.github.domgew.kedis.arguments.SetOptions
 import io.github.domgew.kedis.arguments.SyncOption
-import io.github.domgew.kedis.commands.KedisMessageArrayCommand
 import io.github.domgew.kedis.commands.KedisStringArrayCommand
+import io.github.domgew.kedis.commands.server.FlushCommand
+import io.github.domgew.kedis.commands.value.GetCommand
+import io.github.domgew.kedis.commands.server.InfoCommand
+import io.github.domgew.kedis.commands.server.InfoMapCommand
+import io.github.domgew.kedis.commands.server.InfoRawCommand
+import io.github.domgew.kedis.commands.server.PingCommand
+import io.github.domgew.kedis.commands.value.DelCommand
+import io.github.domgew.kedis.commands.value.ExistsCommand
+import io.github.domgew.kedis.commands.value.SetCommand
+import io.github.domgew.kedis.results.server.InfoSection
+import io.github.domgew.kedis.results.value.SetResult
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
 internal class DefaultKedisClient(
@@ -14,6 +26,8 @@ internal class DefaultKedisClient(
 ): AbstractKedisClient(
     configuration = configuration,
 ) {
+    private val lock = Mutex()
+
     override suspend fun connect() = lock.withLock {
         ensureConnected()
     }
@@ -28,175 +42,115 @@ internal class DefaultKedisClient(
         }
     }
 
-    override suspend fun ping(content: String): String? = lock.withLock {
-        return@withLock when (
-            val result = executeCommand(
-                KedisStringArrayCommand(
-                    listOf(
-                        "PING",
-                        content,
-                    ),
-                ),
-            )
-        ) {
-            is RedisMessage.StringMessage -> result.value
-
-            is RedisMessage.NullMessage -> null
-
-            else -> throw KedisException.WrongResponse(
-                message = "Expected a string response, was ${result::class}",
-            )
-        }
+    override suspend fun ping(
+        content: String,
+    ): String = lock.withLock {
+        executeCommand(
+            PingCommand(
+                content = content,
+            ),
+        )
     }
 
-    override suspend fun serverVersion(): String = lock.withLock {
-        return@withLock when (
-            val result = executeCommand(
-                KedisStringArrayCommand(
-                    listOf(
-                        "INFO",
-                        "server",
-                    ),
-                ),
-            )
-        ) {
-            is RedisMessage.StringMessage -> result.value
-
-            else -> throw KedisException.WrongResponse(
-                message = "Expected a string response, was ${result::class}",
-            )
-        }
+    override suspend fun info(
+        vararg section: InfoSectionName,
+    ): List<InfoSection> = lock.withLock {
+        executeCommand(
+            InfoCommand(
+                sections = section.asList(),
+            ),
+        )
     }
 
-    override suspend fun flushAll(sync: SyncOption): Boolean = lock.withLock {
-        return@withLock when (
-            val result = executeCommand(
-                KedisStringArrayCommand(
-                    listOf(
-                        "FLUSHALL",
-                        sync.toString(),
-                    ),
-                ),
-            )
-        ) {
-            is RedisMessage.StringMessage -> result.value == "OK"
-
-            else -> throw KedisException.WrongResponse(
-                message = "Expected a string response, was ${result::class}",
-            )
-        }
+    override suspend fun infoMap(
+        vararg section: InfoSectionName,
+    ): Map<String?, Map<String, String>> = lock.withLock {
+        executeCommand(
+            InfoMapCommand(
+                sections = section.asList(),
+            ),
+        )
     }
 
-    override suspend fun flushDb(sync: SyncOption): Boolean = lock.withLock {
-        return@withLock when (
-            val result = executeCommand(
-                KedisStringArrayCommand(
-                    listOf(
-                        "FLUSHDB",
-                        sync.toString(),
-                    ),
-                ),
-            )
-        ) {
-            is RedisMessage.StringMessage -> result.value == "OK"
-
-            else -> throw KedisException.WrongResponse(
-                message = "Expected a string response, was ${result::class}",
-            )
-        }
+    override suspend fun infoRaw(
+        vararg section: InfoSectionName,
+    ): String? = lock.withLock {
+        executeCommand(
+            InfoRawCommand(
+                sections = section.asList(),
+            ),
+        )
     }
 
-    override suspend fun get(key: String): String? = lock.withLock {
-        return@withLock when (
-            val result = executeCommand(
-                KedisStringArrayCommand(
-                    listOf(
-                        "GET",
-                        key,
-                    ),
-                ),
-            )
-        ) {
-            is RedisMessage.StringMessage -> result.value
+    override suspend fun flushAll(
+        sync: SyncOption,
+    ): Boolean = lock.withLock {
+        executeCommand(
+            FlushCommand(
+                target = FlushCommand.FlushTarget.ALL,
+                syncOption = sync,
+            ),
+        )
+    }
 
-            is RedisMessage.NullMessage -> null
+    override suspend fun flushDb(
+        sync: SyncOption,
+    ): Boolean = lock.withLock {
+        executeCommand(
+            FlushCommand(
+                target = FlushCommand.FlushTarget.DB,
+                syncOption = sync,
+            ),
+        )
+    }
 
-            else -> throw KedisException.WrongResponse(
-                message = "Expected a string response, was ${result::class}",
-            )
-        }
+    override suspend fun get(
+        key: String,
+    ): String? = lock.withLock {
+        executeCommand(
+            GetCommand(
+                key = key,
+            ),
+        )
     }
 
     override suspend fun set(
         key: String,
         value: String,
         options: SetOptions,
-    ): String? = lock.withLock {
-        return@withLock when (
-            val result = executeCommand(
-                KedisMessageArrayCommand(
-                    listOf(
-                        RedisMessage.BulkStringMessage("SET"),
-                        RedisMessage.BulkStringMessage(key),
-                        RedisMessage.BulkStringMessage(value),
-                        *options.toRedisMessages().toTypedArray(),
-                    ),
-                ),
-            )
-        ) {
-            is RedisMessage.StringMessage -> {
-                if (!options.getPreviousValue && result.value != "OK") {
-                    throw KedisException.WrongResponse(
-                        message = "Expected OK response, was \"${result.value}\"",
-                    )
-                } else {
-                    result.value
-                }
-            }
-
-            is RedisMessage.NullMessage -> null
-
-            else -> throw KedisException.WrongResponse(
-                message = "Expected a string response, was ${result::class}",
-            )
-        }
+    ): SetResult = lock.withLock {
+        executeCommand(
+            SetCommand(
+                key = key,
+                value = value,
+                options = options,
+            ),
+        )
     }
 
-    override suspend fun del(vararg key: String): Long = lock.withLock {
-        return@withLock when (
-            val result = executeCommand(
-                KedisStringArrayCommand(
-                    listOf(
-                        "DEL",
-                        *key,
-                    ),
-                ),
-            )
-        ) {
-            is RedisMessage.IntegerMessage -> result.value
-
-            else -> throw KedisException.WrongResponse(
-                message = "Expected a string response, was ${result::class}",
-            )
-        }
+    override suspend fun del(
+        vararg key: String,
+    ): Long = lock.withLock {
+        executeCommand(
+            DelCommand(
+                keys = key.asList()
+                    // when no keys, the response is clear even without the server
+                    .takeUnless { it.isEmpty() }
+                    ?: return@withLock 0,
+            ),
+        )
     }
 
-    override suspend fun exists(vararg key: String): Long = lock.withLock {
-        return@withLock when (
-            val result = executeCommand(
-                KedisStringArrayCommand(
-                    listOf(
-                        "EXISTS",
-                        *key,
-                    ),
-                ),
-            )
-        ) {
-            is RedisMessage.IntegerMessage -> result.value
-
-            else -> throw KedisException.WrongResponse(
-                message = "Expected a string response, was ${result::class}",
-            )
-        }
+    override suspend fun exists(
+        vararg key: String,
+    ): Long = lock.withLock {
+        executeCommand(
+            ExistsCommand(
+                keys = key.asList()
+                    // when no keys, the response is clear even without the server
+                    .takeUnless { it.isEmpty() }
+                    ?: return@withLock 0,
+            ),
+        )
     }
 }
