@@ -3,7 +3,6 @@ package io.github.domgew.kedis.impl
 import io.github.domgew.kedis.KedisClient
 import io.github.domgew.kedis.KedisConfiguration
 import io.github.domgew.kedis.KedisException
-import io.github.domgew.kedis.commands.KedisCommand
 import io.github.domgew.kedis.commands.KedisFullCommand
 import io.ktor.network.selector.SelectorManager
 import io.ktor.network.sockets.InetSocketAddress
@@ -13,11 +12,12 @@ import io.ktor.network.sockets.openReadChannel
 import io.ktor.network.sockets.openWriteChannel
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
+import io.ktor.utils.io.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 
 internal abstract class AbstractKedisClient(
@@ -49,11 +49,13 @@ internal abstract class AbstractKedisClient(
                     )
             }
         } catch (ex: TimeoutCancellationException) {
+            _socket?.dispose()
             throw KedisException.ConnectionTimeout
         }
-        this._socket = socket
-        this._readChannel = socket.openReadChannel()
-        this._writeChannel = socket.openWriteChannel(autoFlush = false)
+
+        _socket = socket
+        _readChannel = socket.openReadChannel()
+        _writeChannel = socket.openWriteChannel(autoFlush = false)
     }
 
     protected suspend fun ensureConnected() {
@@ -69,26 +71,22 @@ internal abstract class AbstractKedisClient(
     protected suspend fun <T> executeCommand(
         command: KedisFullCommand<T>,
     ): T {
-        ensureConnected()
+        try {
+            ensureConnected()
 
-        command.toRedisRequest()
-            .writeTo(_writeChannel!!)
-        _writeChannel!!.flush()
+            command.toRedisRequest()
+                .writeTo(_writeChannel!!)
+            _writeChannel!!.flush()
 
-        return command.fromRedisResponse(
-            response = RedisMessage.parse(_readChannel!!),
-        )
-    }
-
-    protected suspend fun executeCommand(
-        command: KedisCommand,
-    ): RedisMessage {
-        ensureConnected()
-
-        command.toRedisRequest()
-            .writeTo(_writeChannel!!)
-        _writeChannel!!.flush()
-
-        return RedisMessage.parse(_readChannel!!)
+            return command.fromRedisResponse(
+                response = RedisMessage.parse(_readChannel!!),
+            )
+        } catch (ex: CancellationException) {
+            // for preventing partial reads and writes
+            runBlocking {
+                doClose()
+            }
+            throw ex
+        }
     }
 }

@@ -1,11 +1,9 @@
 package io.github.domgew.kedis.impl
 
 import io.github.domgew.kedis.KedisConfiguration
-import io.github.domgew.kedis.KedisException
 import io.github.domgew.kedis.arguments.InfoSectionName
 import io.github.domgew.kedis.arguments.SetOptions
 import io.github.domgew.kedis.arguments.SyncOption
-import io.github.domgew.kedis.commands.KedisStringArrayCommand
 import io.github.domgew.kedis.commands.server.FlushCommand
 import io.github.domgew.kedis.commands.value.GetCommand
 import io.github.domgew.kedis.commands.server.InfoCommand

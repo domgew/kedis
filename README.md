@@ -16,12 +16,12 @@ provides native and JVM sockets with a unified interface.
 * Native: macOS X64
 * Native: macOS ARM64
 
-**Potential Future Targets** (no Ktor network support):
+**Potential Future Targets** (currently no Ktor Network support):
 
 * Native: MinGW X64
 * JS: NodeJS
 
-**Non-Target - Never Coming**:
+**Non-Targets - Never Coming**:
 
 * Native 32 bit targets
 * Native consumer targets (android, iOS, tvOS, watchOS, ...)
