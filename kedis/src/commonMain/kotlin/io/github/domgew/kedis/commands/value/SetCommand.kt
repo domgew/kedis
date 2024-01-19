@@ -30,7 +30,7 @@ internal class SetCommand(
             options.getPreviousValue
                 && response is RedisMessage.StringMessage ->
                 SetResult.PreviousValue(
-                    data = response.value,
+                    value = response.value,
                 )
 
             response is RedisMessage.StringMessage ->

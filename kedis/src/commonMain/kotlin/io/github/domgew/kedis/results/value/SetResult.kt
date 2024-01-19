@@ -18,7 +18,7 @@ public sealed interface SetResult {
         override val written: Boolean = true
     }
     public data class PreviousValue internal constructor(
-        val data: String,
+        val value: String,
     ) : SetResult {
         override val successful: Boolean = true
         override val written: Boolean = true

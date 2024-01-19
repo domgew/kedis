@@ -1,6 +1,7 @@
 package io.github.domgew.kedis
 
 import io.github.domgew.kedis.arguments.InfoSectionName
+import io.github.domgew.kedis.arguments.SetOptions
 import io.github.domgew.kedis.arguments.SyncOption
 import io.github.domgew.kedis.results.server.InfoSection
 import io.github.domgew.kedis.results.value.SetBinaryResult
@@ -78,6 +79,64 @@ class SimpleE2ETest {
             assertContentEquals(testValueBin, client.getBinary(testKey1))
             assertNull(client.getBinary(testKey2))
             assertEquals(1L, client.exists(testKey1, testKey2))
+            assertEquals(1L, client.del(testKey1))
+            assertEquals(0L, client.exists(testKey1, testKey2))
+            assertEquals(
+                SetResult.Ok,
+                client.set(
+                    key = testKey1,
+                    value = testValue,
+                    options = SetOptions(
+                        previousKeyHandling = SetOptions.PreviousKeyHandling.KEEP_IF_EXISTS,
+                        expire = SetOptions.ExpireOption.ExpiresInMilliseconds(
+                            milliseconds = 60_000L,
+                        ),
+                    ),
+                ),
+            )
+            assertEquals(
+                SetResult.Aborted,
+                client.set(
+                    key = testKey1,
+                    value = testValue,
+                    options = SetOptions(
+                        previousKeyHandling = SetOptions.PreviousKeyHandling.KEEP_IF_EXISTS,
+                        expire = SetOptions.ExpireOption.ExpiresInMilliseconds(
+                            milliseconds = 60_000L,
+                        ),
+                    ),
+                ),
+            )
+            assertEquals(
+                SetResult.PreviousValue(
+                    value = testValue,
+                ),
+                client.set(
+                    key = testKey1,
+                    value = testValue,
+                    options = SetOptions(
+                        expire = SetOptions.ExpireOption.ExpiresInMilliseconds(
+                            milliseconds = 60_000L,
+                        ),
+                        getPreviousValue = true,
+                    ),
+                ),
+            )
+            assertEquals(1L, client.del(testKey1))
+            assertEquals(
+                SetResult.NotFound,
+                client.set(
+                    key = testKey1,
+                    value = testValue,
+                    options = SetOptions(
+                        previousKeyHandling = SetOptions.PreviousKeyHandling.OVERRIDE,
+                        expire = SetOptions.ExpireOption.ExpiresInMilliseconds(
+                            milliseconds = 60_000L,
+                        ),
+                        getPreviousValue = true,
+                    ),
+                ),
+            )
 
             client.closeSuspended()
         }

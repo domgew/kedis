@@ -4,7 +4,13 @@ import io.github.domgew.kedis.impl.RedisMessage
 
 public data class SetOptions(
     val previousKeyHandling: PreviousKeyHandling = PreviousKeyHandling.OVERRIDE,
+
+    /**
+     * * Cannot be used when Redis version <6.2.0
+     * * Cannot be used with [PreviousKeyHandling.KEEP_IF_EXISTS] when Redis version <7.0.0
+     */
     val getPreviousValue: Boolean = false,
+
     val expire: ExpireOption? = null,
 ) {
     internal fun toRedisMessages(): List<RedisMessage> {
@@ -36,10 +42,12 @@ public data class SetOptions(
          * Set the given key to the given value in any case
          */
         OVERRIDE(null),
+
         /**
          * Set the given key to the given value only if the key did not already exist.
          */
         KEEP_IF_EXISTS("NX"),
+
         /**
          * Set the given key to the given value only if the key did already exist.
          */
@@ -62,7 +70,7 @@ public data class SetOptions(
                 ?.let {
                     listOf(
                         RedisMessage.BulkStringMessage(paramName),
-                        RedisMessage.IntegerMessage(it),
+                        RedisMessage.BulkStringMessage(it.toString()),
                     )
                 }
                 ?: listOf(
@@ -76,6 +84,7 @@ public data class SetOptions(
             override val paramValue: Long
                 get() = seconds
         }
+
         public data class ExpiresInMilliseconds(
             val milliseconds: Long,
         ): ExpireOption() {
@@ -83,6 +92,10 @@ public data class SetOptions(
             override val paramValue: Long
                 get() = milliseconds
         }
+
+        /**
+         * Cannot be used when Redis version <6.2.0
+         */
         public data class ExpiresAtUnixEpochSecond(
             val unixEpochSecond: Long,
         ): ExpireOption() {
@@ -90,6 +103,10 @@ public data class SetOptions(
             override val paramValue: Long
                 get() = unixEpochSecond
         }
+
+        /**
+         * Cannot be used when Redis version <6.2.0
+         */
         public data class ExpiresAtUnixEpochMillisecond(
             val unixEpochMillisecond: Long,
         ): ExpireOption() {
@@ -97,6 +114,7 @@ public data class SetOptions(
             override val paramValue: Long
                 get() = unixEpochMillisecond
         }
+
         public data object KeepPreviousTTL: ExpireOption() {
             override val paramName: String = "KEEPTTL"
             override val paramValue: Long? = null
