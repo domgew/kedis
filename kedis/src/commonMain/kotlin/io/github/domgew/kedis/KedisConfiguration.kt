@@ -6,6 +6,10 @@ public data class KedisConfiguration(
      */
     val endpoint: Endpoint,
     /**
+     * Defines the kind of authentication performed by the client to the server.
+     */
+    val authentication: Authentication,
+    /**
      * The maximum time it may take to establish a connection with the redis server.
      */
     val connectionTimeoutMillis: Long,
@@ -29,11 +33,28 @@ public data class KedisConfiguration(
              */
             val port: Int = 6379,
         ) : Endpoint
+
         public data class UnixSocket(
             /**
              * The path of the UNIX socket where the redis server is reachable.
              */
             val path: String,
         ) : Endpoint
+    }
+
+    public sealed interface Authentication {
+        /**
+         * No automatic authentication is performed when the connection is established. You can do so yourself at any point.
+         * @see KedisClient.auth
+         */
+        public data object NoAutoAuth : Authentication
+
+        /**
+         * Authentication is automatically performed after establishing a connection.
+         */
+        public data class AutoAuth(
+            val password: String,
+            val username: String? = null,
+        ) : Authentication
     }
 }

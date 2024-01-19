@@ -12,7 +12,7 @@ import io.github.domgew.kedis.results.value.SetResult
 public interface KedisClient: AutoCloseable {
     public companion object {
         /**
-         * When you connect the client, make sure to disconnect it again. Each command will connect, when the connection is not already open.
+         * When you connect the client, make sure to disconnect it again. Each command (method) will connect, when the connection is not already open.
          */
         public fun newClient(
             configuration: KedisConfiguration,
@@ -23,8 +23,19 @@ public interface KedisClient: AutoCloseable {
         }
     }
 
+    /**
+     * Checks whether the client has a connection to the server and the connection reports to be active.
+     */
     public val isConnected: Boolean
+
+    /**
+     * Manually ensures that the client is connected. When [isConnected] is true, nothing happens, otherwise the connection is established.
+     */
     public suspend fun connect()
+
+    /**
+     * Closes the connection to the server.
+     */
     public suspend fun closeSuspended()
 
     /**
@@ -36,6 +47,22 @@ public interface KedisClient: AutoCloseable {
     public suspend fun ping(
         content: String = "PING",
     ): String
+
+    /**
+     * Authenticates the connection to the server or throws an exception when it failed.
+     * [https://redis.io/commands/auth/](https://redis.io/commands/auth/)
+     */
+    public suspend fun auth(
+        password: String,
+        username: String? = null,
+    )
+
+    /**
+     * Asks the Redis server for the current username.
+     * [https://redis.io/commands/acl-whoami/](https://redis.io/commands/acl-whoami/)
+     * @return The current username
+     */
+    public suspend fun whoAmI(): String
 
     /**
      * [https://redis.io/commands/info/](https://redis.io/commands/info/)

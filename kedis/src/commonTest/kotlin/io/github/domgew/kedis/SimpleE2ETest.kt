@@ -30,6 +30,7 @@ class SimpleE2ETest {
                         host = "127.0.0.1",
                         port = TestConfigUtil.getPort(),
                     ),
+                    authentication = KedisConfiguration.Authentication.NoAutoAuth,
                     connectionTimeoutMillis = 2_000L,
                 ),
             )
@@ -54,6 +55,7 @@ class SimpleE2ETest {
                         host = "127.0.0.1",
                         port = TestConfigUtil.getPort(),
                     ),
+                    authentication = KedisConfiguration.Authentication.NoAutoAuth,
                     connectionTimeoutMillis = 2_000L,
                 ),
             )
@@ -90,6 +92,7 @@ class SimpleE2ETest {
                         host = "127.0.0.1",
                         port = TestConfigUtil.getPort(),
                     ),
+                    authentication = KedisConfiguration.Authentication.NoAutoAuth,
                     connectionTimeoutMillis = 2_000L,
                 ),
             )

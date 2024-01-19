@@ -10,6 +10,7 @@ import io.github.domgew.kedis.commands.server.InfoCommand
 import io.github.domgew.kedis.commands.server.InfoMapCommand
 import io.github.domgew.kedis.commands.server.InfoRawCommand
 import io.github.domgew.kedis.commands.server.PingCommand
+import io.github.domgew.kedis.commands.server.WhoAmICommand
 import io.github.domgew.kedis.commands.value.DelCommand
 import io.github.domgew.kedis.commands.value.ExistsCommand
 import io.github.domgew.kedis.commands.value.GetBinaryCommand
@@ -50,6 +51,22 @@ internal class DefaultKedisClient(
             PingCommand(
                 content = content,
             ),
+        )
+    }
+
+    override suspend fun auth(
+        password: String,
+        username: String?,
+    ) = lock.withLock {
+        performAuthentication(
+            username = username,
+            password = password,
+        )
+    }
+
+    override suspend fun whoAmI(): String = lock.withLock {
+        executeCommand(
+            WhoAmICommand(),
         )
     }
 

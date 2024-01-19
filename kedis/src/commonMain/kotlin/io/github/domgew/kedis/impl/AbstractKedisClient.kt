@@ -4,6 +4,7 @@ import io.github.domgew.kedis.KedisClient
 import io.github.domgew.kedis.KedisConfiguration
 import io.github.domgew.kedis.KedisException
 import io.github.domgew.kedis.commands.KedisFullCommand
+import io.github.domgew.kedis.commands.server.AuthCommand
 import io.ktor.network.selector.SelectorManager
 import io.ktor.network.sockets.InetSocketAddress
 import io.ktor.network.sockets.Socket
@@ -67,6 +68,19 @@ internal abstract class AbstractKedisClient(
         _socket = socket
         _readChannel = socket.openReadChannel()
         _writeChannel = socket.openWriteChannel(autoFlush = false)
+
+        when (configuration.authentication) {
+            is KedisConfiguration.Authentication.AutoAuth -> {
+                performAuthentication(
+                    username = configuration.authentication.username,
+                    password = configuration.authentication.password,
+                )
+            }
+
+            KedisConfiguration.Authentication.NoAutoAuth -> {
+                // no authentication required -> don't do anything
+            }
+        }
     }
 
     protected suspend fun ensureConnected() {
@@ -77,6 +91,18 @@ internal abstract class AbstractKedisClient(
 
     protected suspend fun doClose() {
         _socket?.dispose()
+    }
+
+    protected suspend fun performAuthentication(
+        username: String?,
+        password: String,
+    ) {
+        executeCommand(
+            AuthCommand(
+                username = username,
+                password = password,
+            ),
+        )
     }
 
     protected suspend fun <T> executeCommand(
