@@ -4,33 +4,39 @@ import io.github.domgew.kedis.KedisException
 import io.github.domgew.kedis.arguments.SetOptions
 import io.github.domgew.kedis.commands.KedisFullCommand
 import io.github.domgew.kedis.impl.RedisMessage
-import io.github.domgew.kedis.results.value.SetResult
+import io.github.domgew.kedis.results.value.SetBinaryResult
 
 // see https://redis.io/commands/set/
-internal class SetCommand(
+internal class SetBinaryCommand(
     val key: String,
-    val value: String,
+    val value: ByteArray,
     val options: SetOptions,
-): KedisFullCommand<SetResult> {
-    override fun fromRedisResponse(response: RedisMessage): SetResult =
+): KedisFullCommand<SetBinaryResult> {
+    override fun fromRedisResponse(response: RedisMessage): SetBinaryResult =
         when {
             !options.getPreviousValue
                 && response is RedisMessage.NullMessage ->
-                SetResult.Aborted
+                SetBinaryResult.Aborted
 
             !options.getPreviousValue
                 && response is RedisMessage.StringMessage
                 && response.value == "OK" ->
-                SetResult.Ok
+                SetBinaryResult.Ok
 
             options.getPreviousValue
                 && response is RedisMessage.NullMessage ->
-                SetResult.NotFound
+                SetBinaryResult.NotFound
+
+            options.getPreviousValue
+                && response is RedisMessage.BulkStringMessage ->
+                SetBinaryResult.PreviousValue(
+                    data = response.data,
+                )
 
             options.getPreviousValue
                 && response is RedisMessage.StringMessage ->
-                SetResult.PreviousValue(
-                    data = response.value,
+                SetBinaryResult.PreviousValue(
+                    data = response.value.encodeToByteArray(),
                 )
 
             response is RedisMessage.StringMessage ->

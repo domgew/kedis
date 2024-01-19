@@ -15,6 +15,11 @@ internal class GetCommand(
             is RedisMessage.NullMessage ->
                 null
 
+            is RedisMessage.ErrorMessage ->
+                handleRedisErrorResponse(
+                    response = response,
+                )
+
             else ->
                 throw KedisException.WrongResponse(
                     message = "Expected string or null response, was ${response::class}",

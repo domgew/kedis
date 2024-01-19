@@ -12,6 +12,11 @@ internal class ExistsCommand(
             is RedisMessage.IntegerMessage ->
                 response.value
 
+            is RedisMessage.ErrorMessage ->
+                handleRedisErrorResponse(
+                    response = response,
+                )
+
             else ->
                 throw KedisException.WrongResponse(
                     message = "Expected integer response, was ${response::class}",

@@ -5,6 +5,7 @@ import io.github.domgew.kedis.arguments.SetOptions
 import io.github.domgew.kedis.arguments.SyncOption
 import io.github.domgew.kedis.impl.DefaultKedisClient
 import io.github.domgew.kedis.results.server.InfoSection
+import io.github.domgew.kedis.results.value.SetBinaryResult
 import io.github.domgew.kedis.results.value.SetResult
 
 @OptIn(ExperimentalStdlibApi::class)
@@ -91,6 +92,16 @@ public interface KedisClient: AutoCloseable {
     ): String?
 
     /**
+     * Gets the value behind the given [key].
+     *
+     * [https://redis.io/commands/get/](https://redis.io/commands/get/)
+     * @return The value or NULL
+     */
+    public suspend fun getBinary(
+        key: String,
+    ): ByteArray?
+
+    /**
      * Sets the value behind the given [key], minding the [options].
      *
      * [https://redis.io/commands/set/](https://redis.io/commands/set/)
@@ -101,6 +112,18 @@ public interface KedisClient: AutoCloseable {
         value: String,
         options: SetOptions = SetOptions(),
     ): SetResult
+
+    /**
+     * Sets the value behind the given [key], minding the [options].
+     *
+     * [https://redis.io/commands/set/](https://redis.io/commands/set/)
+     * @return Whether the operation was successful and the previous value if requested
+     */
+    public suspend fun setBinary(
+        key: String,
+        value: ByteArray,
+        options: SetOptions = SetOptions(),
+    ): SetBinaryResult
 
     /**
      * Removes the provided [key]s. If a key does not exist, no error is thrown.

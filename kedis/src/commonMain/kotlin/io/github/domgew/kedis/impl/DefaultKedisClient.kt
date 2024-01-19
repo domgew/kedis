@@ -12,8 +12,11 @@ import io.github.domgew.kedis.commands.server.InfoRawCommand
 import io.github.domgew.kedis.commands.server.PingCommand
 import io.github.domgew.kedis.commands.value.DelCommand
 import io.github.domgew.kedis.commands.value.ExistsCommand
+import io.github.domgew.kedis.commands.value.GetBinaryCommand
+import io.github.domgew.kedis.commands.value.SetBinaryCommand
 import io.github.domgew.kedis.commands.value.SetCommand
 import io.github.domgew.kedis.results.server.InfoSection
+import io.github.domgew.kedis.results.value.SetBinaryResult
 import io.github.domgew.kedis.results.value.SetResult
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
@@ -112,6 +115,16 @@ internal class DefaultKedisClient(
         )
     }
 
+    override suspend fun getBinary(
+        key: String,
+    ): ByteArray? = lock.withLock {
+        executeCommand(
+            GetBinaryCommand(
+                key = key,
+            ),
+        )
+    }
+
     override suspend fun set(
         key: String,
         value: String,
@@ -119,6 +132,20 @@ internal class DefaultKedisClient(
     ): SetResult = lock.withLock {
         executeCommand(
             SetCommand(
+                key = key,
+                value = value,
+                options = options,
+            ),
+        )
+    }
+
+    override suspend fun setBinary(
+        key: String,
+        value: ByteArray,
+        options: SetOptions,
+    ): SetBinaryResult = lock.withLock {
+        executeCommand(
+            SetBinaryCommand(
                 key = key,
                 value = value,
                 options = options,

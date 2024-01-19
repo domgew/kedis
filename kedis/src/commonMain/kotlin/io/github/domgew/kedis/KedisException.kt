@@ -5,4 +5,7 @@ public sealed interface KedisException {
     public class WrongResponse(
         message: String,
     ) : Exception("Wrong response: $message"), KedisException
+    public class RedisErrorResponse(
+        message: String,
+    ) : Exception("Redis responded with error: $message"), KedisException
 }
