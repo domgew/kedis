@@ -7,6 +7,7 @@ import io.github.domgew.kedis.commands.KedisFullCommand
 import io.ktor.network.selector.SelectorManager
 import io.ktor.network.sockets.InetSocketAddress
 import io.ktor.network.sockets.Socket
+import io.ktor.network.sockets.UnixSocketAddress
 import io.ktor.network.sockets.aSocket
 import io.ktor.network.sockets.openReadChannel
 import io.ktor.network.sockets.openWriteChannel
@@ -39,10 +40,20 @@ internal abstract class AbstractKedisClient(
                 aSocket(SelectorManager(Dispatchers.IO))
                     .tcp()
                     .connect(
-                        remoteAddress = InetSocketAddress(
-                            hostname = configuration.host,
-                            port = configuration.port,
-                        ),
+                        remoteAddress = when (
+                            val endpoint = configuration.endpoint
+                        ) {
+                            is KedisConfiguration.Endpoint.HostPort ->
+                                InetSocketAddress(
+                                    hostname = endpoint.host,
+                                    port = endpoint.port,
+                                )
+
+                            is KedisConfiguration.Endpoint.UnixSocket ->
+                                UnixSocketAddress(
+                                    path = endpoint.path,
+                                )
+                        },
                         configure = {
                             keepAlive = configuration.keepAlive
                         },

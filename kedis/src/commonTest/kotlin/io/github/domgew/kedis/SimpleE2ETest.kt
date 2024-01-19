@@ -26,8 +26,10 @@ class SimpleE2ETest {
 
             val client = KedisClient.newClient(
                 KedisConfiguration(
-                    host = "127.0.0.1",
-                    port = TestConfigUtil.getPort(),
+                    endpoint = KedisConfiguration.Endpoint.HostPort(
+                        host = "127.0.0.1",
+                        port = TestConfigUtil.getPort(),
+                    ),
                     connectionTimeoutMillis = 2_000L,
                 ),
             )
@@ -48,8 +50,10 @@ class SimpleE2ETest {
 
             val client = KedisClient.newClient(
                 KedisConfiguration(
-                    host = "127.0.0.1",
-                    port = TestConfigUtil.getPort(),
+                    endpoint = KedisConfiguration.Endpoint.HostPort(
+                        host = "127.0.0.1",
+                        port = TestConfigUtil.getPort(),
+                    ),
                     connectionTimeoutMillis = 2_000L,
                 ),
             )
@@ -82,8 +86,10 @@ class SimpleE2ETest {
         withContext(Dispatchers.Default) {
             val client = KedisClient.newClient(
                 KedisConfiguration(
-                    host = "127.0.0.1",
-                    port = TestConfigUtil.getPort(),
+                    endpoint = KedisConfiguration.Endpoint.HostPort(
+                        host = "127.0.0.1",
+                        port = TestConfigUtil.getPort(),
+                    ),
                     connectionTimeoutMillis = 2_000L,
                 ),
             )
