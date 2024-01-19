@@ -9,7 +9,7 @@ val ktorVersion: String by project
 
 plugins {
     kotlin("multiplatform")
-    id("maven-publish")
+    `maven-publish`
 }
 
 group = "io.github.domgew"
@@ -17,6 +17,9 @@ version = "0.0.1"
 
 kotlin {
     explicitApi()
+    withSourcesJar(
+        publish = true,
+    )
 
     jvm {
         jvmToolchain(17)
@@ -53,8 +56,26 @@ kotlin {
 }
 
 publishing {
+    publications.withType<MavenPublication> {
+        pom {
+            name.set("Kedis")
+            description.set("Redis client library for Kotlin Multiplatform (JVM + Native)")
+            url.set("https://github.com/domgew/kedis")
+            scm {
+                url.set("https://github.com/domgew/kedis")
+            }
+        }
+    }
+
     repositories {
-        mavenLocal()
+        if (System.getenv("IS_CI") != "yes") {
+            mavenLocal()
+        } else {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/domgew/kedis")
+            }
+        }
     }
 }
 
@@ -81,12 +102,12 @@ afterEvaluate {
         }
 
 //    println("#####################################")
-//    println("overallPublishTasks:")
+//    println("publish tasks:")
 //    for (task in tasks.withType<PublishToMavenRepository>()) {
 //        println("\t${task.name}")
 //    }
 //    println()
-//    println("platformPublishTasks:")
+//    println("smartPublish tasks:")
 //    for (task in publishTasks) {
 //        println("\t${task.name}")
 //    }

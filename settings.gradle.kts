@@ -1,6 +1,5 @@
 pluginManagement {
     val kotlinVersion: String by settings
-    val foojayVersion: String by settings
 
     repositories {
         gradlePluginPortal()
@@ -12,7 +11,6 @@ pluginManagement {
 
     plugins {
         kotlin("multiplatform") version kotlinVersion apply false
-        id("org.gradle.toolchains.foojay-resolver-convention") version foojayVersion apply false
     }
 }
 
