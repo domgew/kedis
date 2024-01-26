@@ -11,7 +11,7 @@ internal class SetBinaryCommand(
     val key: String,
     val value: ByteArray,
     val options: SetOptions,
-): KedisFullCommand<SetBinaryResult> {
+) : KedisFullCommand<SetBinaryResult> {
     override fun fromRedisResponse(response: RedisMessage): SetBinaryResult =
         when {
             !options.getPreviousValue
@@ -61,7 +61,8 @@ internal class SetBinaryCommand(
                 RedisMessage.BulkStringMessage(OPERATION_NAME),
                 RedisMessage.BulkStringMessage(key),
                 RedisMessage.BulkStringMessage(value),
-                *options.toRedisMessages().toTypedArray(),
+                *options.toRedisMessages()
+                    .toTypedArray(),
             ),
         )
 

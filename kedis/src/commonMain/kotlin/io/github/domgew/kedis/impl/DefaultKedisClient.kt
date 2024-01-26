@@ -5,7 +5,6 @@ import io.github.domgew.kedis.arguments.InfoSectionName
 import io.github.domgew.kedis.arguments.SetOptions
 import io.github.domgew.kedis.arguments.SyncOption
 import io.github.domgew.kedis.commands.server.FlushCommand
-import io.github.domgew.kedis.commands.value.GetCommand
 import io.github.domgew.kedis.commands.server.InfoCommand
 import io.github.domgew.kedis.commands.server.InfoMapCommand
 import io.github.domgew.kedis.commands.server.InfoRawCommand
@@ -14,6 +13,7 @@ import io.github.domgew.kedis.commands.server.WhoAmICommand
 import io.github.domgew.kedis.commands.value.DelCommand
 import io.github.domgew.kedis.commands.value.ExistsCommand
 import io.github.domgew.kedis.commands.value.GetBinaryCommand
+import io.github.domgew.kedis.commands.value.GetCommand
 import io.github.domgew.kedis.commands.value.SetBinaryCommand
 import io.github.domgew.kedis.commands.value.SetCommand
 import io.github.domgew.kedis.results.server.InfoSection
@@ -25,7 +25,7 @@ import kotlinx.coroutines.sync.withLock
 
 internal class DefaultKedisClient(
     configuration: KedisConfiguration,
-): AbstractKedisClient(
+) : AbstractKedisClient(
     configuration = configuration,
 ) {
     private val lock = Mutex()

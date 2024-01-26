@@ -47,7 +47,7 @@ internal object SocketUtil {
         val socket: Socket,
         val readChannel: ByteReadChannel,
         val writeChannel: ByteWriteChannel,
-    ): AutoCloseable {
+    ) : AutoCloseable {
         override fun close() {
             runBlocking {
                 socket.dispose()

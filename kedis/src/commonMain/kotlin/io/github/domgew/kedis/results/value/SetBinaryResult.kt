@@ -9,14 +9,17 @@ public sealed interface SetBinaryResult {
         override val successful: Boolean = true
         override val written: Boolean = false
     }
+
     public data object Ok : SetBinaryResult {
         override val successful: Boolean = true
         override val written: Boolean = true
     }
+
     public data object NotFound : SetBinaryResult {
         override val successful: Boolean = true
         override val written: Boolean = true
     }
+
     public data class PreviousValue internal constructor(
         val data: ByteArray,
     ) : SetBinaryResult {

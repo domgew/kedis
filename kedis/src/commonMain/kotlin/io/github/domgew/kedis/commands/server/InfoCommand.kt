@@ -8,7 +8,7 @@ import io.github.domgew.kedis.results.server.InfoSection
 
 internal class InfoCommand(
     val sections: List<InfoSectionName>,
-): KedisFullCommand<List<InfoSection>> {
+) : KedisFullCommand<List<InfoSection>> {
     override fun fromRedisResponse(response: RedisMessage): List<InfoSection> =
         when (response) {
             is RedisMessage.StringMessage ->

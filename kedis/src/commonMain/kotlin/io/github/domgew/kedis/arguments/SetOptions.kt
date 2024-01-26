@@ -1,5 +1,6 @@
 package io.github.domgew.kedis.arguments
 
+import io.github.domgew.kedis.arguments.SetOptions.PreviousKeyHandling
 import io.github.domgew.kedis.impl.RedisMessage
 
 public data class SetOptions(
@@ -79,7 +80,7 @@ public data class SetOptions(
 
         public data class ExpiresInSeconds(
             val seconds: Long,
-        ): ExpireOption() {
+        ) : ExpireOption() {
             override val paramName: String = "EX"
             override val paramValue: Long
                 get() = seconds
@@ -87,7 +88,7 @@ public data class SetOptions(
 
         public data class ExpiresInMilliseconds(
             val milliseconds: Long,
-        ): ExpireOption() {
+        ) : ExpireOption() {
             override val paramName: String = "PX"
             override val paramValue: Long
                 get() = milliseconds
@@ -98,7 +99,7 @@ public data class SetOptions(
          */
         public data class ExpiresAtUnixEpochSecond(
             val unixEpochSecond: Long,
-        ): ExpireOption() {
+        ) : ExpireOption() {
             override val paramName: String = "EXAT"
             override val paramValue: Long
                 get() = unixEpochSecond
@@ -109,13 +110,13 @@ public data class SetOptions(
          */
         public data class ExpiresAtUnixEpochMillisecond(
             val unixEpochMillisecond: Long,
-        ): ExpireOption() {
+        ) : ExpireOption() {
             override val paramName: String = "PXAT"
             override val paramValue: Long
                 get() = unixEpochMillisecond
         }
 
-        public data object KeepPreviousTTL: ExpireOption() {
+        public data object KeepPreviousTTL : ExpireOption() {
             override val paramName: String = "KEEPTTL"
             override val paramValue: Long? = null
         }

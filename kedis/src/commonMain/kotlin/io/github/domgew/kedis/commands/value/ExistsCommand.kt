@@ -6,7 +6,7 @@ import io.github.domgew.kedis.impl.RedisMessage
 
 internal class ExistsCommand(
     val keys: List<String>,
-): KedisFullCommand<Long> {
+) : KedisFullCommand<Long> {
     override fun fromRedisResponse(response: RedisMessage): Long =
         when (response) {
             is RedisMessage.IntegerMessage ->

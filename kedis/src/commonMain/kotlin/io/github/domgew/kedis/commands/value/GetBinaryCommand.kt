@@ -6,7 +6,7 @@ import io.github.domgew.kedis.impl.RedisMessage
 
 internal class GetBinaryCommand(
     val key: String,
-): KedisFullCommand<ByteArray?> {
+) : KedisFullCommand<ByteArray?> {
     override fun fromRedisResponse(response: RedisMessage): ByteArray? =
         when (response) {
             is RedisMessage.BulkStringMessage ->

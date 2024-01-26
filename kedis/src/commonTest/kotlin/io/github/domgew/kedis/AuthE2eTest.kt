@@ -31,7 +31,7 @@ class AuthE2eTest {
                         password = password,
                     ),
                     connectionTimeoutMillis = 2_000L,
-                )
+                ),
             )
 
             try {
@@ -65,12 +65,16 @@ class AuthE2eTest {
                     ),
                     authentication = KedisConfiguration.Authentication.NoAutoAuth,
                     connectionTimeoutMillis = 2_000L,
-                )
+                ),
             )
 
             try {
                 client.connect()
-                assertEquals("default", client.whoAmI().lowercase())
+                assertEquals(
+                    "default",
+                    client.whoAmI()
+                        .lowercase(),
+                )
                 client.auth(
                     username = username,
                     password = password,

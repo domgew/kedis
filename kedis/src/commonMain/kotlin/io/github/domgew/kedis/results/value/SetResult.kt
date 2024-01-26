@@ -9,14 +9,17 @@ public sealed interface SetResult {
         override val successful: Boolean = true
         override val written: Boolean = false
     }
+
     public data object Ok : SetResult {
         override val successful: Boolean = true
         override val written: Boolean = true
     }
+
     public data object NotFound : SetResult {
         override val successful: Boolean = true
         override val written: Boolean = true
     }
+
     public data class PreviousValue internal constructor(
         val value: String,
     ) : SetResult {

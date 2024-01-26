@@ -3,9 +3,9 @@ package io.github.domgew.kedis.impl
 import io.github.domgew.kedis.KedisClient
 import io.github.domgew.kedis.KedisConfiguration
 import io.github.domgew.kedis.KedisException
-import io.github.domgew.kedis.commoniseConnectException
 import io.github.domgew.kedis.commands.KedisFullCommand
 import io.github.domgew.kedis.commands.server.AuthCommand
+import io.github.domgew.kedis.commoniseConnectException
 import io.github.domgew.kedis.commoniseNetworkExceptions
 import io.ktor.network.selector.SelectorManager
 import io.ktor.network.sockets.InetSocketAddress
@@ -26,16 +26,16 @@ import kotlinx.coroutines.withTimeout
 
 internal abstract class AbstractKedisClient(
     protected val configuration: KedisConfiguration,
-): KedisClient {
+) : KedisClient {
     private var _socket: Socket? = null
     private var _writeChannel: ByteWriteChannel? = null
     private var _readChannel: ByteReadChannel? = null
 
     final override val isConnected: Boolean
         get() = _socket != null
-                && _writeChannel != null
-                && _readChannel != null
-                && _socket?.isActive == true
+            && _writeChannel != null
+            && _readChannel != null
+            && _socket?.isActive == true
 
     private suspend fun doConnect() {
         val socket = try {

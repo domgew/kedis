@@ -4,7 +4,7 @@ import io.github.domgew.kedis.KedisException
 import io.github.domgew.kedis.commands.KedisFullCommand
 import io.github.domgew.kedis.impl.RedisMessage
 
-internal class WhoAmICommand: KedisFullCommand<String> {
+internal class WhoAmICommand : KedisFullCommand<String> {
     override fun fromRedisResponse(response: RedisMessage): String =
         when (response) {
             is RedisMessage.StringMessage ->

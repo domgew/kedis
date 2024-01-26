@@ -11,11 +11,11 @@ internal sealed class RedisMessage {
     class ParsingException(
         message: String,
         type: KClass<*>,
-    ): Exception("Could not parse $type: $message")
+    ) : Exception("Could not parse $type: $message")
 
     data class SimpleStringMessage(
         override val value: String,
-    ): StringMessage() {
+    ) : StringMessage() {
         override suspend fun writeTo(outgoing: ByteWriteChannel) {
             outgoing.writeFully("+$value\r\n".encodeToByteArray())
         }
@@ -37,7 +37,7 @@ internal sealed class RedisMessage {
 
     data class SimpleErrorMessage(
         override val value: String,
-    ): ErrorMessage() {
+    ) : ErrorMessage() {
         override suspend fun writeTo(outgoing: ByteWriteChannel) {
             outgoing.writeFully("-$value\r\n".encodeToByteArray())
         }
@@ -59,7 +59,7 @@ internal sealed class RedisMessage {
 
     data class IntegerMessage(
         val value: Long,
-    ): NumericMessage() {
+    ) : NumericMessage() {
         override suspend fun writeTo(outgoing: ByteWriteChannel) {
             outgoing.writeFully(":$value\r\n".encodeToByteArray())
         }
@@ -82,7 +82,7 @@ internal sealed class RedisMessage {
 
     data class BulkStringMessage(
         val data: ByteArray,
-    ): StringMessage() {
+    ) : StringMessage() {
         override val value: String
             get() = data.decodeToString()
 
@@ -135,7 +135,7 @@ internal sealed class RedisMessage {
 
     data class ArrayMessage(
         val value: List<RedisMessage>,
-    ): ArrayLikeMessage() {
+    ) : ArrayLikeMessage() {
         override fun asList(): List<RedisMessage> =
             value
 
@@ -171,7 +171,7 @@ internal sealed class RedisMessage {
         }
     }
 
-    object NullMessage: RedisMessage() {
+    object NullMessage : RedisMessage() {
         const val TYPE_BYTE: Byte = 95 // '_'
 
         override suspend fun writeTo(outgoing: ByteWriteChannel) {
@@ -197,7 +197,7 @@ internal sealed class RedisMessage {
 
     data class BooleanMessage(
         val value: Boolean,
-    ): RedisMessage() {
+    ) : RedisMessage() {
         override suspend fun writeTo(outgoing: ByteWriteChannel) {
             val strValue =
                 if (value) {
@@ -227,7 +227,7 @@ internal sealed class RedisMessage {
                         else -> throw parsingException<BooleanMessage>(
                             message = "Expected $TRUE_BYTE (t) or $FALSE_BYTE (f), was $resultByte",
                         )
-                    }
+                    },
                 )
             }
         }
@@ -235,7 +235,7 @@ internal sealed class RedisMessage {
 
     data class DoubleMessage(
         val value: Double,
-    ): NumericMessage() {
+    ) : NumericMessage() {
         override suspend fun writeTo(outgoing: ByteWriteChannel) {
             when (value) {
                 Double.POSITIVE_INFINITY -> {
@@ -267,8 +267,10 @@ internal sealed class RedisMessage {
 
             // ",inf\r\n" -> INF
             private val INF_BYTES = "inf".encodeToByteArray()
+
             // ",-inf\r\n" -> -INF
             private val NINF_BYTES = "-inf".encodeToByteArray()
+
             // ",nan\r\n" -> NaN
             private val NAN_BYTES = "nan".encodeToByteArray()
 
@@ -282,7 +284,8 @@ internal sealed class RedisMessage {
                         INF_BYTES -> Double.POSITIVE_INFINITY
                         NINF_BYTES -> Double.NEGATIVE_INFINITY
                         NAN_BYTES -> Double.NaN
-                        else -> resultBytes.decodeToString().toDouble()
+                        else -> resultBytes.decodeToString()
+                            .toDouble()
                     },
                 )
             }
@@ -291,7 +294,7 @@ internal sealed class RedisMessage {
 
     data class BigNumberMessage(
         val value: BigInteger,
-    ): NumericMessage() {
+    ) : NumericMessage() {
         override suspend fun writeTo(outgoing: ByteWriteChannel) {
             outgoing.writeFully("(${value.toString(10)}\r\n".encodeToByteArray())
         }
@@ -316,7 +319,7 @@ internal sealed class RedisMessage {
 
     data class BulkErrorMessage(
         override val value: String,
-    ): ErrorMessage() {
+    ) : ErrorMessage() {
         override suspend fun writeTo(outgoing: ByteWriteChannel) {
             val valueBytes = value.encodeToByteArray()
 
@@ -345,7 +348,7 @@ internal sealed class RedisMessage {
     data class VerbatimStringMessage(
         val type: String,
         override val value: String,
-    ): StringMessage() {
+    ) : StringMessage() {
         override suspend fun writeTo(outgoing: ByteWriteChannel) {
             val payloadBytes = "$type:$value".encodeToByteArray()
 
@@ -375,7 +378,7 @@ internal sealed class RedisMessage {
 
     data class MessageMapMessage(
         val value: Map<RedisMessage, RedisMessage>,
-    ): RedisMessage() {
+    ) : RedisMessage() {
         override suspend fun writeTo(outgoing: ByteWriteChannel) {
             outgoing.writeFully("%${value.size}\r\n".encodeToByteArray())
             for (item in value.entries) {
@@ -399,7 +402,7 @@ internal sealed class RedisMessage {
                 for (i in 0 until length) {
                     val key = RedisMessage.parse(incoming)
                     val value = RedisMessage.parse(incoming)
-                    result[i] = Pair(key,value)
+                    result[i] = Pair(key, value)
                 }
 
                 return MessageMapMessage(
@@ -411,7 +414,7 @@ internal sealed class RedisMessage {
 
     data class MessageSetMessage(
         val value: Set<RedisMessage>,
-    ): ArrayLikeMessage() {
+    ) : ArrayLikeMessage() {
         override fun asList(): List<RedisMessage> =
             value.toList()
 
@@ -442,7 +445,7 @@ internal sealed class RedisMessage {
 
     data class MessagePushMessage(
         val value: List<RedisMessage>,
-    ): ArrayLikeMessage() {
+    ) : ArrayLikeMessage() {
         override fun asList(): List<RedisMessage> =
             value
 
@@ -471,14 +474,17 @@ internal sealed class RedisMessage {
         }
     }
 
-    sealed class ErrorMessage: RedisMessage() {
+    sealed class ErrorMessage : RedisMessage() {
         abstract val value: String
     }
-    sealed class StringMessage: RedisMessage() {
+
+    sealed class StringMessage : RedisMessage() {
         abstract val value: String
     }
-    sealed class NumericMessage: RedisMessage()
-    sealed class ArrayLikeMessage: RedisMessage() {
+
+    sealed class NumericMessage : RedisMessage()
+
+    sealed class ArrayLikeMessage : RedisMessage() {
         abstract fun asList(): List<RedisMessage>
     }
 
@@ -549,11 +555,12 @@ internal sealed class RedisMessage {
             return result.toByteArray()
         }
 
-        private suspend inline fun <reified T: RedisMessage> readLength(incoming: ByteReadChannel): Int {
+        private suspend inline fun <reified T : RedisMessage> readLength(incoming: ByteReadChannel): Int {
             val lengthBytes = readUntilCR(incoming)
             verifyLFByte<T>(incoming)
 
-            return lengthBytes.decodeToString().toInt()
+            return lengthBytes.decodeToString()
+                .toInt()
         }
 
         private suspend fun readNBytes(
@@ -566,7 +573,7 @@ internal sealed class RedisMessage {
             return result
         }
 
-        private suspend inline fun <reified T: RedisMessage> verifyLFByte(
+        private suspend inline fun <reified T : RedisMessage> verifyLFByte(
             incoming: ByteReadChannel,
         ) {
             val currentByte = incoming.readByte()
@@ -578,7 +585,7 @@ internal sealed class RedisMessage {
             }
         }
 
-        private suspend inline fun <reified T: RedisMessage> verifyCRByte(
+        private suspend inline fun <reified T : RedisMessage> verifyCRByte(
             incoming: ByteReadChannel,
         ) {
             val currentByte = incoming.readByte()
@@ -590,7 +597,7 @@ internal sealed class RedisMessage {
             }
         }
 
-        private inline fun <reified T: RedisMessage> parsingException(
+        private inline fun <reified T : RedisMessage> parsingException(
             message: String,
         ): ParsingException =
             ParsingException(

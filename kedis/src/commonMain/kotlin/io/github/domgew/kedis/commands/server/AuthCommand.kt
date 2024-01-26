@@ -7,7 +7,7 @@ import io.github.domgew.kedis.impl.RedisMessage
 internal class AuthCommand(
     val username: String?,
     val password: String,
-): KedisFullCommand<Unit> {
+) : KedisFullCommand<Unit> {
     override fun fromRedisResponse(response: RedisMessage): Unit =
         when {
             response is RedisMessage.StringMessage

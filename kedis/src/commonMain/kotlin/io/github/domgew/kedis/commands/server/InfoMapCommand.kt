@@ -8,7 +8,7 @@ import io.github.domgew.kedis.results.server.InfoSection
 
 internal class InfoMapCommand(
     val sections: List<InfoSectionName>,
-): KedisFullCommand<Map<String?, Map<String, String>>> {
+) : KedisFullCommand<Map<String?, Map<String, String>>> {
     override fun fromRedisResponse(response: RedisMessage): Map<String?, Map<String, String>> =
         when (response) {
             is RedisMessage.StringMessage ->

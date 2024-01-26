@@ -9,7 +9,7 @@ import io.github.domgew.kedis.results.value.SetBinaryResult
 import io.github.domgew.kedis.results.value.SetResult
 
 @OptIn(ExperimentalStdlibApi::class)
-public interface KedisClient: AutoCloseable {
+public interface KedisClient : AutoCloseable {
     public companion object {
         /**
          * When you connect the client, make sure to disconnect it again. Each command (method) will connect, when the connection is not already open.

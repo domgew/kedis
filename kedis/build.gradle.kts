@@ -16,13 +16,17 @@ plugins {
 group = "io.github.domgew"
 version = "0.0.1-SNAPSHOT"
 
-val commitTagPattern = Pattern.compile(
-    "^(\\d+)\\.(\\d+)\\.(\\d+)(-([a-z]+)(\\d+))?$",
-)!!
+val commitTagPattern =
+    Pattern.compile(
+        "^(\\d+)\\.(\\d+)\\.(\\d+)(-([a-z]+)(\\d+))?$",
+    )!!
 val commitTag = System.getenv("CI_COMMIT_TAG")
     ?.trim()
     ?.ifEmpty { null }
-    ?.takeIf { commitTagPattern.asMatchPredicate().test(it) }
+    ?.takeIf {
+        commitTagPattern.asMatchPredicate()
+            .test(it)
+    }
 
 if (commitTag != null) {
     version = commitTag
@@ -108,8 +112,8 @@ afterEvaluate {
 
                 HostManager.hostIsLinux ->
                     it.name.startsWith("linux", true)
-                            || it.name.startsWith("js", true)
-                            || it.name.startsWith("jvm", true)
+                        || it.name.startsWith("js", true)
+                        || it.name.startsWith("jvm", true)
 
                 else ->
                     throw Exception("unknown host")
@@ -126,10 +130,10 @@ afterEvaluate {
 
                 HostManager.hostIsLinux ->
                     it.name.startsWith("publishLinux")
-                            || it.name.startsWith("publishJs")
-                            || it.name.startsWith("publishJvmPublication")
-                            || it.name.startsWith("publishMetadata")
-                            || it.name.startsWith("publishKotlinMultiplatform")
+                        || it.name.startsWith("publishJs")
+                        || it.name.startsWith("publishJvmPublication")
+                        || it.name.startsWith("publishMetadata")
+                        || it.name.startsWith("publishKotlinMultiplatform")
 
                 else -> throw Exception("unknown host")
             }

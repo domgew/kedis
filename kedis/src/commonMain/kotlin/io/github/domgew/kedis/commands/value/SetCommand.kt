@@ -11,7 +11,7 @@ internal class SetCommand(
     val key: String,
     val value: String,
     val options: SetOptions,
-): KedisFullCommand<SetResult> {
+) : KedisFullCommand<SetResult> {
     override fun fromRedisResponse(response: RedisMessage): SetResult =
         when {
             !options.getPreviousValue
@@ -55,7 +55,8 @@ internal class SetCommand(
                 RedisMessage.BulkStringMessage(OPERATION_NAME),
                 RedisMessage.BulkStringMessage(key),
                 RedisMessage.BulkStringMessage(value),
-                *options.toRedisMessages().toTypedArray(),
+                *options.toRedisMessages()
+                    .toTypedArray(),
             ),
         )
 

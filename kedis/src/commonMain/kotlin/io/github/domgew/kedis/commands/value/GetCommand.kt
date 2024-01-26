@@ -6,7 +6,7 @@ import io.github.domgew.kedis.impl.RedisMessage
 
 internal class GetCommand(
     val key: String,
-): KedisFullCommand<String?> {
+) : KedisFullCommand<String?> {
     override fun fromRedisResponse(response: RedisMessage): String? =
         when (response) {
             is RedisMessage.StringMessage ->

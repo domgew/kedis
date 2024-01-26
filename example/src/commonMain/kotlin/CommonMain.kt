@@ -34,7 +34,7 @@ fun commonMain() {
                 ),
                 authentication = KedisConfiguration.Authentication.NoAutoAuth,
                 connectionTimeoutMillis = 250,
-            )
+            ),
         )
 
         routing {
@@ -128,11 +128,11 @@ private suspend fun KedisClient.getOrCallback(
                     value = it,
                     options = SetOptions(
                         previousKeyHandling =
-                            if (overrideIfExists) {
-                                SetOptions.PreviousKeyHandling.OVERRIDE
-                            } else {
-                                SetOptions.PreviousKeyHandling.KEEP_IF_EXISTS
-                            },
+                        if (overrideIfExists) {
+                            SetOptions.PreviousKeyHandling.OVERRIDE
+                        } else {
+                            SetOptions.PreviousKeyHandling.KEEP_IF_EXISTS
+                        },
                         expire = SetOptions.ExpireOption.ExpiresInMilliseconds(
                             milliseconds = ttlMillis,
                         ),

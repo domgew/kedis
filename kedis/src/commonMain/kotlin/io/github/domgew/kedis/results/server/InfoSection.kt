@@ -113,7 +113,7 @@ public sealed class InfoSection {
          * **shutdown_in_milliseconds**: The maximum time remaining for replicas to catch up the replication before completing the shutdown sequence. This field is only present during shutdown.
          */
         val shutdownMilliseconds: Long?,
-    ): InfoSection() {
+    ) : InfoSection() {
         override val sectionName: InfoSectionName = InfoSectionName.SERVER
 
         public enum class RedisMode(
@@ -132,7 +132,7 @@ public sealed class InfoSection {
             }
         }
 
-        internal companion object: InfoSectionResolver {
+        internal companion object : InfoSectionResolver {
             override val SECTION_NAME = "server"
 
             override fun fromValues(values: Map<String, String>) =
@@ -223,10 +223,10 @@ public sealed class InfoSection {
          * **total_blocking_keys_on_nokey**: Number of blocking keys that one or more clients that would like to be unblocked when the key is deleted. Added in Redis 7.2.
          */
         val totalBlockingKeysOnNoKey: Long?,
-    ): InfoSection() {
+    ) : InfoSection() {
         override val sectionName: InfoSectionName = InfoSectionName.CLIENTS
 
-        internal companion object: InfoSectionResolver {
+        internal companion object : InfoSectionResolver {
             override val SECTION_NAME = "clients"
 
             override fun fromValues(values: Map<String, String>) =
@@ -462,10 +462,10 @@ public sealed class InfoSection {
          * **lazyfreed_objects**: The number of objects that have been lazy freed.
          */
         val lazyFreedObjects: ULong?,
-    ): InfoSection() {
+    ) : InfoSection() {
         override val sectionName: InfoSectionName = InfoSectionName.MEMORY
 
-        internal companion object: InfoSectionResolver {
+        internal companion object : InfoSectionResolver {
             override val SECTION_NAME = "memory"
 
             override fun fromValues(values: Map<String, String>) =
@@ -569,7 +569,7 @@ public sealed class InfoSection {
                     // check format
                     ?.takeIf { it.endsWith('%') && it.contains('.') }
                     // remove percent sign
-                    ?.let { it.substring(0 ..(it.length - 2)) }
+                    ?.let { it.substring(0..(it.length - 2)) }
                     ?.toFloatOrNull()
         }
     }
@@ -784,10 +784,10 @@ public sealed class InfoSection {
          * **loading_eta_seconds**: ETA in seconds for the load to be complete
          */
         val loadingEtaSeconds: Long?,
-    ): InfoSection() {
+    ) : InfoSection() {
         override val sectionName: InfoSectionName = InfoSectionName.PERSISTENCE
 
-        internal companion object: InfoSectionResolver {
+        internal companion object : InfoSectionResolver {
             override val SECTION_NAME = "persistence"
 
             override fun fromValues(values: Map<String, String>) =
@@ -910,17 +910,17 @@ public sealed class InfoSection {
                     val line = lines[lineIdx++]
                     val delimiterIdx = line.indexOf(VALUE_DELIMITER)
                         .takeUnless { it < 0 || it >= line.length }
-                        // not a key-value pair
+                    // not a key-value pair
                         ?: continue
                     val key = line.substring(0 until delimiterIdx)
                         .trim()
                         .ifEmpty { null }
-                        // empty key
+                    // empty key
                         ?: continue
                     val value = line.substring(delimiterIdx + 1)
                         .trim()
                         .ifEmpty { null }
-                        // empty value
+                    // empty value
                         ?: continue
 
                     sectionValues[key] = value
