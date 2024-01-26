@@ -30,4 +30,11 @@ public sealed class KedisException private constructor(
     ) : KedisException(
         message = "Redis responded with error: $message",
     )
+
+    public class GenericNetworkException(
+        cause: Throwable,
+    ) : KedisException(
+        message = "Network exception: ${cause.message ?: "---"}",
+        cause = cause,
+    )
 }

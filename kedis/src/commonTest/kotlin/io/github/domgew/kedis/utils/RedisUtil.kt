@@ -5,7 +5,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
 object RedisUtil {
-    suspend fun createUser(
+    internal suspend fun createUser(
         username: String,
         password: String,
     ) {
@@ -35,7 +35,7 @@ object RedisUtil {
         }
     }
 
-    suspend fun removeUser(
+    internal suspend fun removeUser(
         username: String,
     ) {
         SocketUtil.withConnectedSocket {

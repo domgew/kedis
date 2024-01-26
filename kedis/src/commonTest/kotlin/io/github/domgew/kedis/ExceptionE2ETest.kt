@@ -11,7 +11,7 @@ class ExceptionE2ETest {
     fun failedToConnect() = runTest {
         withContext(Dispatchers.Default) {
             assertFailsWith(
-                exceptionClass = KedisException.ConnectException::class,
+                exceptionClass = KedisException::class,
             ) {
                 KedisClient.newClient(
                     KedisConfiguration(

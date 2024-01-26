@@ -6,6 +6,7 @@ import io.github.domgew.kedis.KedisException
 import io.github.domgew.kedis.commoniseConnectException
 import io.github.domgew.kedis.commands.KedisFullCommand
 import io.github.domgew.kedis.commands.server.AuthCommand
+import io.github.domgew.kedis.commoniseNetworkExceptions
 import io.ktor.network.selector.SelectorManager
 import io.ktor.network.sockets.InetSocketAddress
 import io.ktor.network.sockets.Socket
@@ -114,15 +115,22 @@ internal abstract class AbstractKedisClient(
         try {
             ensureConnected()
 
-            command.toRedisRequest()
-                .writeTo(_writeChannel!!)
-            _writeChannel!!.flush()
+            return commoniseNetworkExceptions {
+                command.toRedisRequest()
+                    .writeTo(_writeChannel!!)
+                _writeChannel!!.flush()
 
-            return command.fromRedisResponse(
-                response = RedisMessage.parse(_readChannel!!),
-            )
+                return@commoniseNetworkExceptions command.fromRedisResponse(
+                    response = RedisMessage.parse(_readChannel!!),
+                )
+            }
         } catch (ex: CancellationException) {
             // for preventing partial reads and writes
+            runBlocking {
+                doClose()
+            }
+            throw ex
+        } catch (ex: KedisException.GenericNetworkException) {
             runBlocking {
                 doClose()
             }
