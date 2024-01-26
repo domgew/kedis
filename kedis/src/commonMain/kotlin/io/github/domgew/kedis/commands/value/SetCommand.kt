@@ -34,7 +34,7 @@ internal class SetCommand(
                 )
 
             response is RedisMessage.StringMessage ->
-                throw KedisException.WrongResponse(
+                throw KedisException.WrongResponseException(
                     message = "Expected \"OK\" or data, was \"${response.value}\"",
                 )
 
@@ -44,7 +44,7 @@ internal class SetCommand(
                 )
 
             else ->
-                throw KedisException.WrongResponse(
+                throw KedisException.WrongResponseException(
                     message = "Expected string response, was ${response::class}",
                 )
         }

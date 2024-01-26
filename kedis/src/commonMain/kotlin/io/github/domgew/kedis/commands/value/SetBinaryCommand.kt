@@ -40,7 +40,7 @@ internal class SetBinaryCommand(
                 )
 
             response is RedisMessage.StringMessage ->
-                throw KedisException.WrongResponse(
+                throw KedisException.WrongResponseException(
                     message = "Expected \"OK\" or data, was \"${response.value}\"",
                 )
 
@@ -50,7 +50,7 @@ internal class SetBinaryCommand(
                 )
 
             else ->
-                throw KedisException.WrongResponse(
+                throw KedisException.WrongResponseException(
                     message = "Expected string response, was ${response::class}",
                 )
         }

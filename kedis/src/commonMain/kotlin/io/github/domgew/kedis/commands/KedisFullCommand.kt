@@ -7,6 +7,6 @@ internal interface KedisFullCommand<out T>: KedisCommand {
     fun fromRedisResponse(response: RedisMessage): T
 
     fun handleRedisErrorResponse(response: RedisMessage.ErrorMessage): T {
-        throw KedisException.RedisErrorResponse(response.value)
+        throw KedisException.RedisErrorResponseException(response.value)
     }
 }

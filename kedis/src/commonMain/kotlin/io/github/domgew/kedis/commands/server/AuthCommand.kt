@@ -20,7 +20,7 @@ internal class AuthCommand(
                 )
 
             else ->
-                throw KedisException.WrongResponse(
+                throw KedisException.WrongResponseException(
                     message = "Expected string or null response, was ${response::class}",
                 )
         }

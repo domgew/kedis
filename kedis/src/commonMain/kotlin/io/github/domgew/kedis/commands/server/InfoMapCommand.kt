@@ -20,7 +20,7 @@ internal class InfoMapCommand(
                 emptyMap()
 
             else ->
-                throw KedisException.WrongResponse(
+                throw KedisException.WrongResponseException(
                     message = "Expected string response, was ${response::class}",
                 )
         }

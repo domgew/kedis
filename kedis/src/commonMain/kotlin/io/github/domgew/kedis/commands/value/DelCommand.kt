@@ -18,7 +18,7 @@ internal class DelCommand(
                 )
 
             else ->
-                throw KedisException.WrongResponse(
+                throw KedisException.WrongResponseException(
                     message = "Expected integer response, was ${response::class}",
                 )
         }

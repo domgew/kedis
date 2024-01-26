@@ -3,6 +3,7 @@ package io.github.domgew.kedis.impl
 import io.github.domgew.kedis.KedisClient
 import io.github.domgew.kedis.KedisConfiguration
 import io.github.domgew.kedis.KedisException
+import io.github.domgew.kedis.commoniseConnectException
 import io.github.domgew.kedis.commands.KedisFullCommand
 import io.github.domgew.kedis.commands.server.AuthCommand
 import io.ktor.network.selector.SelectorManager
@@ -37,32 +38,34 @@ internal abstract class AbstractKedisClient(
 
     private suspend fun doConnect() {
         val socket = try {
-            withTimeout(configuration.connectionTimeoutMillis) {
-                aSocket(SelectorManager(Dispatchers.IO))
-                    .tcp()
-                    .connect(
-                        remoteAddress = when (
-                            val endpoint = configuration.endpoint
-                        ) {
-                            is KedisConfiguration.Endpoint.HostPort ->
-                                InetSocketAddress(
-                                    hostname = endpoint.host,
-                                    port = endpoint.port,
-                                )
+            commoniseConnectException {
+                withTimeout(configuration.connectionTimeoutMillis) {
+                    aSocket(SelectorManager(Dispatchers.IO))
+                        .tcp()
+                        .connect(
+                            remoteAddress = when (
+                                val endpoint = configuration.endpoint
+                            ) {
+                                is KedisConfiguration.Endpoint.HostPort ->
+                                    InetSocketAddress(
+                                        hostname = endpoint.host,
+                                        port = endpoint.port,
+                                    )
 
-                            is KedisConfiguration.Endpoint.UnixSocket ->
-                                UnixSocketAddress(
-                                    path = endpoint.path,
-                                )
-                        },
-                        configure = {
-                            keepAlive = configuration.keepAlive
-                        },
-                    )
+                                is KedisConfiguration.Endpoint.UnixSocket ->
+                                    UnixSocketAddress(
+                                        path = endpoint.path,
+                                    )
+                            },
+                            configure = {
+                                keepAlive = configuration.keepAlive
+                            },
+                        )
+                }
             }
         } catch (ex: TimeoutCancellationException) {
             _socket?.dispose()
-            throw KedisException.ConnectionTimeout
+            throw KedisException.ConnectionTimeoutException()
         }
 
         _socket = socket

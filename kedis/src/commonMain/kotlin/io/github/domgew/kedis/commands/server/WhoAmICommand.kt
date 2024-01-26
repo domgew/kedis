@@ -16,7 +16,7 @@ internal class WhoAmICommand: KedisFullCommand<String> {
                 )
 
             else ->
-                throw KedisException.WrongResponse(
+                throw KedisException.WrongResponseException(
                     message = "Expected string response, was ${response::class}",
                 )
         }
