@@ -1,0 +1,57 @@
+name: Test
+on:
+  push:
+    branches:
+      - development
+    paths:
+      - "kedis/**"
+      - "gradle.properties"
+      - "gradle/wrapper/**"
+  pull_request:
+    paths:
+      - "kedis/**"
+      - "gradle.properties"
+      - "gradle/wrapper/**"
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      redis6:
+        image: redis:6-alpine
+        ports:
+          - 6380:6379
+      redis7:
+        image: redis:7-alpine
+        ports:
+          - 6381:6379
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+      # https://github.com/actions/cache/blob/main/examples.md#java---gradle
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: Test with Redis 6 on ${{ matrix.os }}
+        run: |
+          export IS_CI=yes
+          export REDIS_PORT=6380
+          ./gradlew cleanTest
+          ./gradlew kedis:smartTest
+      - name: Test with Redis 7 on ${{ matrix.os }}
+        run: |
+          export IS_CI=yes
+          export REDIS_PORT=6381
+          ./gradlew cleanTest
+          ./gradlew kedis:smartTest
