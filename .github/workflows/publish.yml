@@ -1,0 +1,38 @@
+name: Publish
+on:
+  push:
+    tags:
+      - "*"
+jobs:
+  publish:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2.4.2
+      # https://github.com/actions/cache/blob/main/examples.md#java---gradle
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+      - name: publish
+        run: |
+          if [ "$GITHUB_REF_TYPE" != "tag" ]; then echo "not a tag"; exit 1; fi
+          export IS_CI=yes
+          export CI_COMMIT_TAG=$GITHUB_REF_NAME
+          if [[ "$CI_COMMIT_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-z]+[0-9]+)?$ ]]; then echo "version: $CI_COMMIT_TAG"; else echo "not a valid version: $CI_COMMIT_TAG"; exit 1; fi
+          export GH_TOKEN="${{ secrets.GH_PACKAGES_TOKEN }}"
+          ./gradlew kedis:smartPublish

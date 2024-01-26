@@ -1,6 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.konan.target.HostManager
+import java.util.regex.Pattern
 
 val bigNumVersion: String by project
 val kotlinCoroutinesVersion: String by project
@@ -14,6 +15,18 @@ plugins {
 
 group = "io.github.domgew"
 version = "0.0.1-SNAPSHOT"
+
+val commitTagPattern = Pattern.compile(
+    "^(\\d+)\\.(\\d+)\\.(\\d+)(-([a-z]+)(\\d+))?$",
+)!!
+val commitTag = System.getenv("CI_COMMIT_TAG")
+    ?.trim()
+    ?.ifEmpty { null }
+    ?.takeIf { commitTagPattern.asMatchPredicate().test(it) }
+
+if (commitTag != null) {
+    version = commitTag
+}
 
 kotlin {
     explicitApi()
@@ -73,6 +86,10 @@ publishing {
             maven {
                 name = "GitHubPackages"
                 url = uri("https://maven.pkg.github.com/domgew/kedis")
+                credentials {
+                    username = "domgew"
+                    password = System.getenv("GH_TOKEN")
+                }
             }
         }
     }
