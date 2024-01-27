@@ -1,7 +1,7 @@
 # Kedis
 
 ![Latest Tag](https://img.shields.io/github/v/tag/domgew/kedis?label=latest%20tag&cacheSeconds=180)
-![Publish](https://img.shields.io/github/actions/workflow/status/domgew/kedis/.github%2Fworkflows%2Fpublish.yml?branch=development&label=publish&cacheSeconds=180)
+![Publish](https://img.shields.io/github/actions/workflow/status/domgew/kedis/.github%2Fworkflows%2Fpublish.yml?label=publish&cacheSeconds=180)
 ![Test](https://img.shields.io/github/actions/workflow/status/domgew/kedis/.github%2Fworkflows%2Ftest.yml?branch=development&label=test&cacheSeconds=180)
 ![Kotlin](https://img.shields.io/github/languages/top/domgew/kedis?cacheSeconds=86400)
 ![Licence: MIT](https://img.shields.io/github/license/domgew/kedis?cacheSeconds=86400)
