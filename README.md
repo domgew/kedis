@@ -17,14 +17,6 @@ provides native and JVM sockets with a unified interface.
 ## Installation
 
 ```kotlin
-repositories {
-    // ...
-    maven("https://maven.pkg.github.com/domgew/kedis")
-    // ...
-}
-```
-
-```kotlin
 dependencies {
     // ...
 
@@ -32,6 +24,35 @@ dependencies {
 
     // OR just for JVM:
     implementation("io.github.domgew:kedis-jvm:<current_version>")
+
+    // ...
+}
+```
+
+```kotlin
+repositories {
+    exclusiveContent {
+        forRepository {
+            maven {
+                url = uri("https://maven.pkg.github.com/domgew/kedis")
+                credentials {
+                    username = "YOUR_GITHUB_USERNAME"
+                    password = "YOUR_GITHUB_TOKEN" // only needs "read:packages" - https://github.com/settings/tokens
+                }
+            }
+        }
+        filter {
+            includeModuleByRegex("^io\\.github\\.domgew$", "^kedis-?.*")
+        }
+    }
+
+    // OR much slower but simpler:
+    maven("https://maven.pkg.github.com/domgew/kedis") {
+        credentials {
+            username = "YOUR_GITHUB_USERNAME"
+            password = "YOUR_GITHUB_TOKEN" // only needs "read:packages" - https://github.com/settings/tokens
+        }
+    }
 
     // ...
 }
