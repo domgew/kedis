@@ -29,10 +29,16 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
       - name: publish
+        env:
+          IS_CI: yes
+          GH_TOKEN: ${{ secrets.GH_PACKAGES_TOKEN }}
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PRIVATE_PASSWORD: ${{ secrets.GPG_PRIVATE_PASSWORD }}
+          SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
+          SONATYPE_PASS: ${{ secrets.SONATYPE_PASS }}
+          SONATYPE_REPOSITORY_ID: kedis-staging
         run: |
           if [ "$GITHUB_REF_TYPE" != "tag" ]; then echo "not a tag"; exit 1; fi
-          export IS_CI=yes
           export CI_COMMIT_TAG=$GITHUB_REF_NAME
           if [[ "$CI_COMMIT_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-z]+[0-9]+)?$ ]]; then echo "version: $CI_COMMIT_TAG"; else echo "not a valid version: $CI_COMMIT_TAG"; exit 1; fi
-          export GH_TOKEN="${{ secrets.GH_PACKAGES_TOKEN }}"
           ./gradlew kedis:smartPublish

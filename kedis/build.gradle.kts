@@ -10,7 +10,9 @@ val ktorVersion: String by project
 
 plugins {
     kotlin("multiplatform")
+    id("org.jetbrains.dokka")
     `maven-publish`
+    signing
 }
 
 group = "io.github.domgew"
@@ -65,19 +67,63 @@ kotlin {
     }
 }
 
+fun KotlinMultiplatformExtension.addNativeTargets(
+    block: KotlinNativeTarget.() -> Unit,
+) {
+    linuxX64 {
+        block()
+    }
+    linuxArm64 {
+        block()
+    }
+    macosX64 {
+        block()
+    }
+    macosArm64 {
+        block()
+    }
+}
+
+val dokkaOutputDir = "${layout.buildDirectory.get()}/dokka"
+tasks.dokkaHtml {
+    outputDirectory.set(file(dokkaOutputDir))
+}
+val deleteDokkaOutputDir by tasks.register<Delete>("deleteDokkaOutputDirectory") {
+    delete(dokkaOutputDir)
+}
+val javadocJar = tasks.register<Jar>("javadocJar") {
+    dependsOn(deleteDokkaOutputDir, tasks.dokkaHtml)
+    archiveClassifier.set("javadoc")
+    from(dokkaOutputDir)
+}
+
 publishing {
-    publications.withType<MavenPublication> {
-        pom {
-            name.set("Kedis")
-            description.set("Redis client library for Kotlin Multiplatform (JVM + Native)")
-            url.set("https://github.com/domgew/kedis")
-            scm {
+    publications {
+        withType<MavenPublication> {
+            artifact(javadocJar)
+            pom {
+                name.set("Kedis")
+                description.set("Redis client library for Kotlin Multiplatform (JVM + Native)")
                 url.set("https://github.com/domgew/kedis")
-            }
-            licenses {
-                license {
-                    name.set("MIT License")
-                    url.set("https://github.com/domgew/kedis/blob/development/LICENSE")
+                scm {
+                    url.set("https://github.com/domgew/kedis")
+                    connection.set("https://github.com/domgew/kedis.git")
+                }
+                licenses {
+                    license {
+                        name.set("MIT")
+                        url.set("https://opensource.org/licenses/MIT")
+                    }
+                }
+                issueManagement {
+                    system.set("Github")
+                    url.set("https://github.com/domgew/kedis/issues")
+                }
+                developers {
+                    developer {
+                        name.set("domgew")
+                        email.set("44265359+domgew@users.noreply.github.com")
+                    }
                 }
             }
         }
@@ -95,8 +141,52 @@ publishing {
                     password = System.getenv("GH_TOKEN")
                 }
             }
+            // see https://medium.com/kodein-koders/publish-a-kotlin-multiplatform-library-on-maven-central-6e8a394b7030
+            maven {
+                name = "oss"
+
+                val repositoryId = System.getenv("SONATYPE_REPOSITORY_ID")
+                    ?.trim()
+                    ?.ifEmpty { null }
+                    ?: "kedis-staging"
+                val releasesRepoUrl = uri(
+                    "https://s01.oss.sonatype.org/service/local/staging/deployByRepositoryId/$repositoryId/",
+                )
+                val snapshotsRepoUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+                url =
+                    if (
+                        version.toString()
+                            .endsWith("SNAPSHOT")
+                    )
+                        snapshotsRepoUrl
+                    else
+                        releasesRepoUrl
+
+                credentials {
+                    username = System.getenv("SONATYPE_USER")
+                        ?.trim()
+                        ?.ifEmpty { null }
+                    password = System.getenv("SONATYPE_PASS")
+                        ?.trim()
+                        ?.ifEmpty { null }
+                }
+            }
         }
     }
+}
+
+signing {
+    useInMemoryPgpKeys(
+        System.getenv("GPG_PRIVATE_KEY"),
+        System.getenv("GPG_PRIVATE_PASSWORD"),
+    )
+    sign(publishing.publications)
+}
+
+// https://github.com/gradle/gradle/issues/26091
+val signingTasks = tasks.withType<Sign>()
+tasks.withType<AbstractPublishToMaven>().configureEach {
+    dependsOn(signingTasks)
 }
 
 // smartPublish as per https://github.com/Dominaezzz/kotlin-sqlite/blob/master/build.gradle.kts
@@ -168,22 +258,5 @@ afterEvaluate {
     }
     project.tasks.register("smartPublish") {
         dependsOn(publishTasks)
-    }
-}
-
-fun KotlinMultiplatformExtension.addNativeTargets(
-    block: KotlinNativeTarget.() -> Unit,
-) {
-    linuxX64 {
-        block()
-    }
-    linuxArm64 {
-        block()
-    }
-    macosX64 {
-        block()
-    }
-    macosArm64 {
-        block()
     }
 }

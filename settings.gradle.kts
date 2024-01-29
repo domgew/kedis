@@ -1,5 +1,6 @@
 pluginManagement {
     val kotlinVersion: String by settings
+    val dokkaVersion: String by settings
 
     repositories {
         gradlePluginPortal()
@@ -11,6 +12,7 @@ pluginManagement {
 
     plugins {
         kotlin("multiplatform") version kotlinVersion apply false
+        id("org.jetbrains.dokka") version dokkaVersion apply false
     }
 }
 
