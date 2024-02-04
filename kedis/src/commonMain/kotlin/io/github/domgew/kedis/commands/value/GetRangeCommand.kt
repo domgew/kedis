@@ -4,13 +4,15 @@ import io.github.domgew.kedis.KedisException
 import io.github.domgew.kedis.commands.KedisFullCommand
 import io.github.domgew.kedis.impl.RedisMessage
 
-// see https://redis.io/commands/del/
-internal class DelCommand(
-    val keys: List<String>,
-) : KedisFullCommand<Long> {
-    override fun fromRedisResponse(response: RedisMessage): Long =
+// see https://redis.io/commands/getrange/
+internal class GetRangeCommand(
+    val key: String,
+    val start: Long,
+    val end: Long,
+) : KedisFullCommand<String> {
+    override fun fromRedisResponse(response: RedisMessage): String =
         when (response) {
-            is RedisMessage.IntegerMessage ->
+            is RedisMessage.StringMessage ->
                 response.value
 
             is RedisMessage.ErrorMessage ->
@@ -20,7 +22,7 @@ internal class DelCommand(
 
             else ->
                 throw KedisException.WrongResponseException(
-                    message = "Expected integer response, was ${response::class}",
+                    message = "Expected string or null response, was ${response::class}",
                 )
         }
 
@@ -28,13 +30,13 @@ internal class DelCommand(
         RedisMessage.ArrayMessage(
             value = listOf(
                 RedisMessage.BulkStringMessage(OPERATION_NAME),
-                *keys
-                    .map { RedisMessage.BulkStringMessage(it) }
-                    .toTypedArray(),
+                RedisMessage.BulkStringMessage(key),
+                RedisMessage.BulkStringMessage(start.toString()),
+                RedisMessage.BulkStringMessage(end.toString()),
             ),
         )
 
     companion object {
-        private const val OPERATION_NAME = "DEL"
+        private const val OPERATION_NAME = "GETRANGE"
     }
 }

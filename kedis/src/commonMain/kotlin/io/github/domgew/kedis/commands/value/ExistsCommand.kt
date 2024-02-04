@@ -4,6 +4,7 @@ import io.github.domgew.kedis.KedisException
 import io.github.domgew.kedis.commands.KedisFullCommand
 import io.github.domgew.kedis.impl.RedisMessage
 
+// see https://redis.io/commands/exists/
 internal class ExistsCommand(
     val keys: List<String>,
 ) : KedisFullCommand<Long> {

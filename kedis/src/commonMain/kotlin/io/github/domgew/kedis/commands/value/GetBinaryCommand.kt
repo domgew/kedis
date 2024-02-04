@@ -4,6 +4,7 @@ import io.github.domgew.kedis.KedisException
 import io.github.domgew.kedis.commands.KedisFullCommand
 import io.github.domgew.kedis.impl.RedisMessage
 
+// see https://redis.io/commands/get/
 internal class GetBinaryCommand(
     val key: String,
 ) : KedisFullCommand<ByteArray?> {

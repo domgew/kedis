@@ -152,6 +152,38 @@ public interface KedisClient : AutoCloseable {
     ): ByteArray?
 
     /**
+     * Gets part ([start]..[end] - both inclusive, clamped to real bounds) of the value behind the given [key]. The range parameters may also be negative to index from the end of the string. If the [key] does not exist, the result will be empty.
+     *
+     * [https://redis.io/commands/getrange/](https://redis.io/commands/getrange/)
+     * @param start The inclusive start of the requested range - may be negative
+     * @param end The inclusive end of the requested range - may be negative
+     * @return The requested part ([start]..[end]) of the value behind the [key]
+     * @see [getRange]
+     */
+    public suspend fun getRange(
+        key: String,
+        start: Long,
+        end: Long,
+    ): String
+
+    /**
+     * Gets part ([range] - clamped to real bounds) of the value behind the given [key]. If the [key] does not exist, the result will be empty.
+     *
+     * [https://redis.io/commands/getrange/](https://redis.io/commands/getrange/)
+     * @return The requested part ([range]) of the value behind the [key]
+     * @see [getRange]
+     */
+    public suspend fun getRange(
+        key: String,
+        range: LongRange,
+    ): String =
+        getRange(
+            key = key,
+            start = range.first,
+            end = range.last,
+        )
+
+    /**
      * Sets the value behind the given [key], minding the [options].
      *
      * [https://redis.io/commands/set/](https://redis.io/commands/set/)
@@ -204,6 +236,18 @@ public interface KedisClient : AutoCloseable {
     public suspend fun append(
         key: String,
         value: String,
+    ): Long
+
+    /**
+     * Retrieves the string length of the value behind the given [key]. If the [key] does not exist, it will be 0.
+     *
+     * Only works on string values. It may or may not work on binary data.
+     *
+     * [https://redis.io/commands/strlen/](https://redis.io/commands/strlen/)
+     * @return The length of the value
+     */
+    public suspend fun strLen(
+        key: String,
     ): Long
 
     /**

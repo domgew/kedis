@@ -4,9 +4,9 @@ import io.github.domgew.kedis.KedisException
 import io.github.domgew.kedis.commands.KedisFullCommand
 import io.github.domgew.kedis.impl.RedisMessage
 
-// see https://redis.io/commands/del/
-internal class DelCommand(
-    val keys: List<String>,
+// see https://redis.io/commands/strlen/
+internal class StrLenCommand(
+    val key: String,
 ) : KedisFullCommand<Long> {
     override fun fromRedisResponse(response: RedisMessage): Long =
         when (response) {
@@ -28,13 +28,11 @@ internal class DelCommand(
         RedisMessage.ArrayMessage(
             value = listOf(
                 RedisMessage.BulkStringMessage(OPERATION_NAME),
-                *keys
-                    .map { RedisMessage.BulkStringMessage(it) }
-                    .toTypedArray(),
+                RedisMessage.BulkStringMessage(key),
             ),
         )
 
     companion object {
-        private const val OPERATION_NAME = "DEL"
+        private const val OPERATION_NAME = "STRLEN"
     }
 }

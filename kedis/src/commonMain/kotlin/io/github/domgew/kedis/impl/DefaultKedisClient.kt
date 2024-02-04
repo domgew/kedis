@@ -18,11 +18,13 @@ import io.github.domgew.kedis.commands.value.DelCommand
 import io.github.domgew.kedis.commands.value.ExistsCommand
 import io.github.domgew.kedis.commands.value.GetBinaryCommand
 import io.github.domgew.kedis.commands.value.GetCommand
+import io.github.domgew.kedis.commands.value.GetRangeCommand
 import io.github.domgew.kedis.commands.value.IncrByCommand
 import io.github.domgew.kedis.commands.value.IncrByFloatCommand
 import io.github.domgew.kedis.commands.value.IncrCommand
 import io.github.domgew.kedis.commands.value.SetBinaryCommand
 import io.github.domgew.kedis.commands.value.SetCommand
+import io.github.domgew.kedis.commands.value.StrLenCommand
 import io.github.domgew.kedis.results.server.InfoSection
 import io.github.domgew.kedis.results.value.SetBinaryResult
 import io.github.domgew.kedis.results.value.SetResult
@@ -159,6 +161,20 @@ internal class DefaultKedisClient(
         )
     }
 
+    override suspend fun getRange(
+        key: String,
+        start: Long,
+        end: Long
+    ): String = lock.withLock {
+        executeCommand(
+            GetRangeCommand(
+                key = key,
+                start = start,
+                end = end,
+            ),
+        )
+    }
+
     override suspend fun set(
         key: String,
         value: String,
@@ -221,6 +237,16 @@ internal class DefaultKedisClient(
             AppendCommand(
                 key = key,
                 value = value,
+            ),
+        )
+    }
+
+    override suspend fun strLen(
+        key: String,
+    ): Long = lock.withLock {
+        executeCommand(
+            StrLenCommand(
+                key = key,
             ),
         )
     }
