@@ -4,16 +4,23 @@ import io.github.domgew.kedis.KedisConfiguration
 import io.github.domgew.kedis.arguments.InfoSectionName
 import io.github.domgew.kedis.arguments.SetOptions
 import io.github.domgew.kedis.arguments.SyncOption
+import io.github.domgew.kedis.commands.server.BgSaveCommand
 import io.github.domgew.kedis.commands.server.FlushCommand
 import io.github.domgew.kedis.commands.server.InfoCommand
 import io.github.domgew.kedis.commands.server.InfoMapCommand
 import io.github.domgew.kedis.commands.server.InfoRawCommand
 import io.github.domgew.kedis.commands.server.PingCommand
 import io.github.domgew.kedis.commands.server.WhoAmICommand
+import io.github.domgew.kedis.commands.value.AppendCommand
+import io.github.domgew.kedis.commands.value.DecrByCommand
+import io.github.domgew.kedis.commands.value.DecrCommand
 import io.github.domgew.kedis.commands.value.DelCommand
 import io.github.domgew.kedis.commands.value.ExistsCommand
 import io.github.domgew.kedis.commands.value.GetBinaryCommand
 import io.github.domgew.kedis.commands.value.GetCommand
+import io.github.domgew.kedis.commands.value.IncrByCommand
+import io.github.domgew.kedis.commands.value.IncrByFloatCommand
+import io.github.domgew.kedis.commands.value.IncrCommand
 import io.github.domgew.kedis.commands.value.SetBinaryCommand
 import io.github.domgew.kedis.commands.value.SetCommand
 import io.github.domgew.kedis.results.server.InfoSection
@@ -122,6 +129,16 @@ internal class DefaultKedisClient(
         )
     }
 
+    override suspend fun bgSave(
+        schedule: Boolean,
+    ) = lock.withLock {
+        executeCommand(
+            BgSaveCommand(
+                schedule = schedule,
+            ),
+        )
+    }
+
     override suspend fun get(
         key: String,
     ): String? = lock.withLock {
@@ -192,6 +209,74 @@ internal class DefaultKedisClient(
                     // when no keys, the response is clear even without the server
                     .takeUnless { it.isEmpty() }
                     ?: return@withLock 0,
+            ),
+        )
+    }
+
+    override suspend fun append(
+        key: String,
+        value: String,
+    ): Long = lock.withLock {
+        executeCommand(
+            AppendCommand(
+                key = key,
+                value = value,
+            ),
+        )
+    }
+
+    override suspend fun decr(
+        key: String,
+    ): Long = lock.withLock {
+        executeCommand(
+            DecrCommand(
+                key = key,
+            ),
+        )
+    }
+
+    override suspend fun decrBy(
+        key: String,
+        by: Long,
+    ): Long = lock.withLock {
+        executeCommand(
+            DecrByCommand(
+                key = key,
+                by = by,
+            ),
+        )
+    }
+
+    override suspend fun incr(
+        key: String,
+    ): Long = lock.withLock {
+        executeCommand(
+            IncrCommand(
+                key = key,
+            ),
+        )
+    }
+
+    override suspend fun incrBy(
+        key: String,
+        by: Long,
+    ): Long = lock.withLock {
+        executeCommand(
+            IncrByCommand(
+                key = key,
+                by = by,
+            ),
+        )
+    }
+
+    override suspend fun incrByFloat(
+        key: String,
+        by: Double,
+    ): Double = lock.withLock {
+        executeCommand(
+            IncrByFloatCommand(
+                key = key,
+                by = by,
             ),
         )
     }

@@ -11,6 +11,7 @@ import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -167,6 +168,48 @@ class SimpleE2ETest {
             assertNotNull(serverInfo.os)
             assertNotNull(serverInfo.processId)
             assertNotNull(serverInfo.redisVersion)
+        }
+    }
+
+    @Test
+    fun incrementalChanges() = runTest {
+        withContext(Dispatchers.Default) {
+            val floatKey = "testKeyFloat"
+            val intKey = "testKeyInt"
+            val strKey = "testKeyStr"
+
+            val client = KedisClient.newClient(
+                KedisConfiguration(
+                    endpoint = KedisConfiguration.Endpoint.HostPort(
+                        host = "127.0.0.1",
+                        port = TestConfigUtil.getPort(),
+                    ),
+                    authentication = KedisConfiguration.Authentication.NoAutoAuth,
+                    connectionTimeoutMillis = 2_000L,
+                ),
+            )
+
+            assertTrue(client.flushAll(sync = SyncOption.SYNC))
+            assertNull(client.get(intKey))
+            assertEquals(1, client.incr(intKey))
+            assertEquals(0, client.decr(intKey))
+            assertEquals(-1, client.decr(intKey))
+            assertEquals(0, client.incr(intKey))
+            assertEquals(5, client.incrBy(intKey, 5))
+            assertEquals(7, client.incrBy(intKey, 2))
+            assertEquals(1, client.decrBy(intKey, 6))
+            assertNull(client.get(floatKey))
+            assertEquals(2.65, client.incrByFloat(floatKey, 2.65))
+            assertEquals(2.63, client.incrByFloat(floatKey, -0.02))
+            assertEquals(3.15, client.incrByFloat(floatKey, 0.52))
+            assertEquals(1.52, client.incrByFloat(intKey, 0.52))
+            assertNull(client.get(strKey))
+            assertEquals(4, client.append(strKey, "test"))
+            assertEquals(8, client.append(strKey, "Test"))
+            assertEquals("testTest", client.get(strKey))
+            assertFailsWith<KedisException.RedisErrorResponseException> {
+                client.incrByFloat(strKey, 0.5)
+            }
         }
     }
 }

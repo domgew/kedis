@@ -8,11 +8,17 @@ import io.github.domgew.kedis.results.server.InfoSection
 import io.github.domgew.kedis.results.value.SetBinaryResult
 import io.github.domgew.kedis.results.value.SetResult
 
+/**
+ * The public interface of the client. It contains all available commands. Use [KedisClient.newClient] to create an instance.
+ * @see [KedisClient.newClient]
+ */
 @OptIn(ExperimentalStdlibApi::class)
 public interface KedisClient : AutoCloseable {
     public companion object {
         /**
-         * When you connect the client, make sure to disconnect it again. Each command (method) will connect, when the connection is not already open.
+         * Creates a new client instance without connecting.
+         *
+         * When you connect the client, make sure to disconnect it again. Each command (method) will connect automatically, when the connection is not already open.
          */
         public fun newClient(
             configuration: KedisConfiguration,
@@ -39,10 +45,10 @@ public interface KedisClient : AutoCloseable {
     public suspend fun closeSuspended()
 
     /**
-     * Sends a message to the server which should be returned unchanged.
+     * Sends a message ([content]) to the server which should be returned unchanged (e.g. result should equal [content]).
      *
      * [https://redis.io/commands/ping/](https://redis.io/commands/ping/)
-     * @return The response - should be the [content]
+     * @return The response from the Redis server - should be [content]
      */
     public suspend fun ping(
         content: String = "PING",
@@ -50,6 +56,7 @@ public interface KedisClient : AutoCloseable {
 
     /**
      * Authenticates the connection to the server or throws an exception when it failed.
+     *
      * [https://redis.io/commands/auth/](https://redis.io/commands/auth/)
      */
     public suspend fun auth(
@@ -59,12 +66,15 @@ public interface KedisClient : AutoCloseable {
 
     /**
      * Asks the Redis server for the current username.
+     *
      * [https://redis.io/commands/acl-whoami/](https://redis.io/commands/acl-whoami/)
      * @return The current username
      */
     public suspend fun whoAmI(): String
 
     /**
+     * Queries the info for the requested [section]s from the Redis server in a strictly typed form.
+     *
      * [https://redis.io/commands/info/](https://redis.io/commands/info/)
      * @return The requested information
      */
@@ -73,6 +83,8 @@ public interface KedisClient : AutoCloseable {
     ): List<InfoSection>
 
     /**
+     * Queries the info for the requested [section]s from the Redis server in string map form.
+     *
      * [https://redis.io/commands/info/](https://redis.io/commands/info/)
      * @return The requested information - the first key is the lowercase section name, the second the actual field
      */
@@ -81,6 +93,8 @@ public interface KedisClient : AutoCloseable {
     ): Map<String?, Map<String, String>>
 
     /**
+     * Queries the info for the requested [section]s from the Redis server in string form.
+     *
      * [https://redis.io/commands/info/](https://redis.io/commands/info/)
      * @return The requested information
      */
@@ -107,6 +121,15 @@ public interface KedisClient : AutoCloseable {
     public suspend fun flushDb(
         sync: SyncOption = SyncOption.SYNC,
     ): Boolean
+
+    /**
+     * Saves the current DB to disk in the background. When [schedule], it will only be scheduled, otherwise it will be started immediately.
+     *
+     * [https://redis.io/commands/bgsave/](https://redis.io/commands/bgsave/)
+     */
+    public suspend fun bgSave(
+        schedule: Boolean = false,
+    )
 
     /**
      * Gets the value behind the given [key].
@@ -171,4 +194,84 @@ public interface KedisClient : AutoCloseable {
     public suspend fun exists(
         vararg key: String,
     ): Long
+
+    /**
+     * Appends the given [value] to the current value behind the given [key]. If the [key] does not exist yet, it will be created.
+     *
+     * [https://redis.io/commands/append/](https://redis.io/commands/append/)
+     * @return The length of the value after appending
+     */
+    public suspend fun append(
+        key: String,
+        value: String,
+    ): Long
+
+    /**
+     * Decrements the value behind the given [key] by one (1). If it does not exist at the beginning, it is assumed to be 0 before decrementing.
+     *
+     * [https://redis.io/commands/decr/](https://redis.io/commands/decr/)
+     * @return The value after decrementing
+     * @see decrBy
+     * @see incr
+     * @see incrBy
+     * @see incrByFloat
+     */
+    public suspend fun decr(
+        key: String,
+    ): Long
+
+    /**
+     * Decrements the value behind the given [key] by [by]. If it does not exist at the beginning, it is assumed to be 0 before decrementing.
+     *
+     * [https://redis.io/commands/decrby/](https://redis.io/commands/decrby/)
+     * @return The value after decrementing
+     * @see decr
+     * @see incr
+     * @see incrBy
+     * @see incrByFloat
+     */
+    public suspend fun decrBy(
+        key: String,
+        by: Long,
+    ): Long
+
+    /**
+     * Increments the value behind the given [key] by one (1). If it does not exist at the beginning, it is assumed to be 0 before incrementing.
+     *
+     * [https://redis.io/commands/incr/](https://redis.io/commands/incr/)
+     * @return The value after incrementing
+     * @see incrBy
+     * @see decr
+     * @see decrBy
+     * @see incrByFloat
+     */
+    public suspend fun incr(
+        key: String,
+    ): Long
+
+    /**
+     * Increments the value behind the given [key] by [by]. If it does not exist at the beginning, it is assumed to be 0 before incrementing.
+     *
+     * [https://redis.io/commands/incrby/](https://redis.io/commands/incrby/)
+     * @return The value after incrementing
+     * @see incr
+     * @see decr
+     * @see decrBy
+     * @see incrByFloat
+     */
+    public suspend fun incrBy(
+        key: String,
+        by: Long,
+    ): Long
+
+    /**
+     * Increments (or decrements when [by] is negative) the value behind the given [key] by [by]. If it does not exist at the beginning, it is assumed to be 0 before incrementing / decrementing.
+     *
+     * [https://redis.io/commands/incrbyfloat/](https://redis.io/commands/incrbyfloat/)
+     * @return The value after incrementing / decrementing
+     */
+    public suspend fun incrByFloat(
+        key: String,
+        by: Double = 1.0,
+    ): Double
 }
