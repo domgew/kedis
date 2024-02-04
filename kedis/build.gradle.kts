@@ -107,7 +107,8 @@ publishing {
                 url.set("https://github.com/domgew/kedis")
                 scm {
                     url.set("https://github.com/domgew/kedis")
-                    connection.set("https://github.com/domgew/kedis.git")
+                    connection.set("scm:git:git://github.com/domgew/kedis.git")
+                    developerConnection.set("scm:git:ssh://github.com:domgew/kedis.git")
                 }
                 licenses {
                     license {
