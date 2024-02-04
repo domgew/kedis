@@ -146,12 +146,13 @@ publishing {
             maven {
                 name = "oss"
 
-                val repositoryId = System.getenv("SONATYPE_REPOSITORY_ID")
-                    ?.trim()
-                    ?.ifEmpty { null }
-                    ?: "kedis-staging"
+                // not working:
+//                 val repositoryId = System.getenv("SONATYPE_REPOSITORY_ID")
+//                     ?.trim()
+//                     ?.ifEmpty { null }
+//                     ?: "kedis-staging"
                 val releasesRepoUrl = uri(
-                    "https://s01.oss.sonatype.org/service/local/staging/deployByRepositoryId/$repositoryId/",
+                    "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/",
                 )
                 val snapshotsRepoUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
                 url =

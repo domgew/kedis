@@ -36,7 +36,7 @@ jobs:
           GPG_PRIVATE_PASSWORD: ${{ secrets.GPG_PRIVATE_PASSWORD }}
           SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
           SONATYPE_PASS: ${{ secrets.SONATYPE_PASS }}
-          SONATYPE_REPOSITORY_ID: kedis-staging
+#          SONATYPE_REPOSITORY_ID: kedis-staging
         run: |
           if [ "$GITHUB_REF_TYPE" != "tag" ]; then echo "not a tag"; exit 1; fi
           export CI_COMMIT_TAG=$GITHUB_REF_NAME
