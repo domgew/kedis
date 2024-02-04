@@ -1,15 +1,17 @@
 # Kedis
 
-![Latest Tag](https://img.shields.io/github/v/tag/domgew/kedis?label=latest%20tag&cacheSeconds=180)
-![Publish](https://img.shields.io/github/actions/workflow/status/domgew/kedis/.github%2Fworkflows%2Fpublish.yml?label=publish&cacheSeconds=180)
-![Test](https://img.shields.io/github/actions/workflow/status/domgew/kedis/.github%2Fworkflows%2Ftest.yml?branch=development&label=test&cacheSeconds=180)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.domgew/kedis)](https://central.sonatype.com/search?q=kedis&namespace=io.github.domgew)
+[![Latest Tag](https://img.shields.io/github/v/tag/domgew/kedis?label=latest%20tag&cacheSeconds=180)](https://github.com/domgew/kedis/tags)
+[![Publish](https://img.shields.io/github/actions/workflow/status/domgew/kedis/.github%2Fworkflows%2Fpublish.yml?label=publish&cacheSeconds=180)](https://github.com/domgew/kedis/actions/workflows/publish.yml)
+[![Test](https://img.shields.io/github/actions/workflow/status/domgew/kedis/.github%2Fworkflows%2Ftest.yml?branch=development&label=test&cacheSeconds=180)](https://github.com/domgew/kedis/actions/workflows/test.yml)
 ![Kotlin](https://img.shields.io/github/languages/top/domgew/kedis?cacheSeconds=86400)
-![Licence: MIT](https://img.shields.io/github/license/domgew/kedis?cacheSeconds=86400)
+[![Licence: MIT](https://img.shields.io/github/license/domgew/kedis?cacheSeconds=86400)](./LICENSE)
 
-Kedis is a Redis client library for Kotlin Multiplatform (JVM + Native). This is possible via Ktor Network, which
+Kedis is a Redis client library for Kotlin Multiplatform (JVM + Native). This is possible via [Ktor Network sockets](https://ktor.io/docs/servers-raw-sockets.html), which
 provides native and JVM sockets with a unified interface.
 
 * [Installation](#installation)
+* [Documentation](#documentation)
 * [Targets](#targets)
 * [Library Comparison](#library-comparison)
 * [Examples](#examples)
@@ -31,6 +33,9 @@ dependencies {
 
 ```kotlin
 repositories {
+    mavenCentral()
+
+    // OR directly from GitHub:
     exclusiveContent {
         forRepository {
             maven {
@@ -46,7 +51,7 @@ repositories {
         }
     }
 
-    // OR much slower but simpler:
+    // OR directly and simpler from GitHub but much slower:
     maven("https://maven.pkg.github.com/domgew/kedis") {
         credentials {
             username = "YOUR_GITHUB_USERNAME"
@@ -57,6 +62,10 @@ repositories {
     // ...
 }
 ```
+
+## Documentation
+
+See Dokka-generated [docs](https://javadoc.io/doc/io.github.domgew/kedis/latest/kedis/io.github.domgew.kedis/index.html). For available commands see the documentation of the KedisClient interface and the KedisConfiguration for the available configuration options.
 
 ## Targets
 
