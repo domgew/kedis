@@ -11,6 +11,7 @@ val ktorVersion: String by project
 plugins {
     kotlin("multiplatform")
     id("org.jetbrains.dokka")
+    id("org.jetbrains.kotlinx.kover")
     `maven-publish`
     signing
 }

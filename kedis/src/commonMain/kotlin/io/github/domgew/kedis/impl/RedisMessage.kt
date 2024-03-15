@@ -5,6 +5,8 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import kotlin.reflect.KClass
 
+// TODO: add unit tests (input/output according to doc samples)
+// TODO: add unit tests for error cases
 internal sealed class RedisMessage {
     abstract suspend fun writeTo(outgoing: ByteWriteChannel)
 

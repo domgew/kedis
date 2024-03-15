@@ -5,6 +5,7 @@ import io.github.domgew.kedis.commands.KedisFullCommand
 import io.github.domgew.kedis.impl.RedisMessage
 
 // see https://redis.io/commands/bgsave/
+// TODO: add tests
 internal class BgSaveCommand(
     val schedule: Boolean,
 ) : KedisFullCommand<Unit> {
