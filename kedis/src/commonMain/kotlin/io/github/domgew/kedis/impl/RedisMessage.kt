@@ -5,15 +5,13 @@ import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import kotlin.reflect.KClass
 
-// TODO: add unit tests (input/output according to doc samples)
-// TODO: add unit tests for error cases
 internal sealed class RedisMessage {
     abstract suspend fun writeTo(outgoing: ByteWriteChannel)
 
     class ParsingException(
         message: String,
         type: KClass<*>,
-    ) : Exception("Could not parse $type: $message")
+    ) : Exception("Could not parse ${type.simpleName}: $message")
 
     data class SimpleStringMessage(
         override val value: String,
@@ -239,20 +237,20 @@ internal sealed class RedisMessage {
         val value: Double,
     ) : NumericMessage() {
         override suspend fun writeTo(outgoing: ByteWriteChannel) {
-            when (value) {
-                Double.POSITIVE_INFINITY -> {
+            when {
+                value.isInfinite() && value > 0.0 -> {
                     outgoing.writeByte(TYPE_BYTE)
                     outgoing.writeFully(INF_BYTES)
                     outgoing.writeFully(CRLF_BYTES)
                 }
 
-                Double.NEGATIVE_INFINITY -> {
+                value.isInfinite() -> {
                     outgoing.writeByte(TYPE_BYTE)
                     outgoing.writeFully(NINF_BYTES)
                     outgoing.writeFully(CRLF_BYTES)
                 }
 
-                Double.NaN -> {
+                value.isNaN() -> {
                     outgoing.writeByte(TYPE_BYTE)
                     outgoing.writeFully(NAN_BYTES)
                     outgoing.writeFully(CRLF_BYTES)
@@ -282,12 +280,19 @@ internal sealed class RedisMessage {
                 verifyLFByte<DoubleMessage>(incoming)
 
                 return DoubleMessage(
-                    value = when (resultBytes) {
-                        INF_BYTES -> Double.POSITIVE_INFINITY
-                        NINF_BYTES -> Double.NEGATIVE_INFINITY
-                        NAN_BYTES -> Double.NaN
-                        else -> resultBytes.decodeToString()
-                            .toDouble()
+                    value = when {
+                        resultBytes.contentEquals(INF_BYTES) ->
+                            Double.POSITIVE_INFINITY
+
+                        resultBytes.contentEquals(NINF_BYTES) ->
+                            Double.NEGATIVE_INFINITY
+
+                        resultBytes.contentEquals(NAN_BYTES) ->
+                            Double.NaN
+
+                        else ->
+                            resultBytes.decodeToString()
+                                .toDouble()
                     },
                 )
             }
