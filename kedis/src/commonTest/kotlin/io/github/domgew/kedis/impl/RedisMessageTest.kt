@@ -1,6 +1,6 @@
 package io.github.domgew.kedis.impl
 
-import io.github.domgew.kedis.utils.CByteWriteChannel
+import io.github.domgew.kedis.utils.TestByteWriteChannel
 import io.ktor.utils.io.ByteReadChannel
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -29,7 +29,7 @@ class RedisMessageTest {
         assertIs<T>(actual)
         assertEquals(expected, actual)
 
-        val writer = CByteWriteChannel()
+        val writer = TestByteWriteChannel()
 
         actual.writeTo(writer)
 
