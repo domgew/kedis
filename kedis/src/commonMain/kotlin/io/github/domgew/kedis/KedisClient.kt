@@ -4,9 +4,12 @@ import io.github.domgew.kedis.arguments.InfoSectionName
 import io.github.domgew.kedis.arguments.SetOptions
 import io.github.domgew.kedis.arguments.SyncOption
 import io.github.domgew.kedis.impl.DefaultKedisClient
+import io.github.domgew.kedis.results.server.BgSaveResult
 import io.github.domgew.kedis.results.server.InfoSection
+import io.github.domgew.kedis.results.value.ExpireTimeResult
 import io.github.domgew.kedis.results.value.SetBinaryResult
 import io.github.domgew.kedis.results.value.SetResult
+import io.github.domgew.kedis.results.value.TtlResult
 
 /**
  * The public interface of the client. It contains all available commands. Use [KedisClient.newClient] to create an instance.
@@ -129,7 +132,7 @@ public interface KedisClient : AutoCloseable {
      */
     public suspend fun bgSave(
         schedule: Boolean = false,
-    )
+    ): BgSaveResult
 
     /**
      * Gets the value behind the given [key].
@@ -226,6 +229,36 @@ public interface KedisClient : AutoCloseable {
     public suspend fun exists(
         vararg key: String,
     ): Long
+
+    /**
+     * Gets the time in UNIX seconds or milliseconds - depending on the [inMilliseconds] argument - when the given [key] expires.
+     *
+     * Only available for redis >=7.0.0.
+     *
+     * [https://redis.io/commands/expiretime/](https://redis.io/commands/expiretime/)
+     *
+     * [https://redis.io/commands/pexpiretime/](https://redis.io/commands/pexpiretime/)
+     * @param inMilliseconds Whether the resulting time should be in milliseconds or seconds
+     * @return The time UNIX timestamp ([inMilliseconds]) of expiration
+     */
+    public suspend fun expireTime(
+        key: String,
+        inMilliseconds: Boolean = true,
+    ): ExpireTimeResult
+
+    /**
+     * Gets the remaining time-to-live in seconds or milliseconds - depending on the [inMilliseconds] argument.
+     *
+     * [https://redis.io/commands/ttl/](https://redis.io/commands/ttl/)
+     *
+     * [https://redis.io/commands/pttl/](https://redis.io/commands/pttl/)
+     * @param inMilliseconds Whether the resulting time should be in milliseconds or seconds
+     * @return The remaining time-to-live (seconds or milliseconds)
+     */
+    public suspend fun ttl(
+        key: String,
+        inMilliseconds: Boolean = true,
+    ): TtlResult
 
     /**
      * Appends the given [value] to the current value behind the given [key]. If the [key] does not exist yet, it will be created.

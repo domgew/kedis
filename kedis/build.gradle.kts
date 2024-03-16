@@ -6,7 +6,9 @@ import java.util.regex.Pattern
 val bigNumVersion: String by project
 val kotlinCoroutinesVersion: String by project
 val kotlinLoggingVersion: String by project
+val kotlinxDatetimeVersion: String by project
 val ktorVersion: String by project
+val semverVersion: String by project
 
 plugins {
     kotlin("multiplatform")
@@ -54,15 +56,15 @@ kotlin {
 
                 api("org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlinCoroutinesVersion")
                 implementation("io.ktor:ktor-network:$ktorVersion")
-
                 api("com.ionspin.kotlin:bignum:$bigNumVersion")
-                api("io.github.oshai:kotlin-logging:$kotlinLoggingVersion")
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinCoroutinesVersion")
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:$kotlinxDatetimeVersion")
+                implementation("net.swiftzer.semver:semver:$semverVersion")
             }
         }
     }

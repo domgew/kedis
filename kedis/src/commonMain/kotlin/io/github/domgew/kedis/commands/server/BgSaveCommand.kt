@@ -3,32 +3,27 @@ package io.github.domgew.kedis.commands.server
 import io.github.domgew.kedis.KedisException
 import io.github.domgew.kedis.commands.KedisFullCommand
 import io.github.domgew.kedis.impl.RedisMessage
+import io.github.domgew.kedis.results.server.BgSaveResult
 
 // see https://redis.io/commands/bgsave/
-// TODO: add tests
 internal class BgSaveCommand(
     val schedule: Boolean,
-) : KedisFullCommand<Unit> {
-    override fun fromRedisResponse(response: RedisMessage): Unit =
+) : KedisFullCommand<BgSaveResult> {
+    override fun fromRedisResponse(response: RedisMessage): BgSaveResult =
         when {
             response is RedisMessage.StringMessage
-                && !schedule
                 && response.value == RESULT_SUCCESS_STARTED ->
-                Unit
+                BgSaveResult.Started
 
             response is RedisMessage.StringMessage
                 && schedule
                 && response.value == RESULT_SUCCESS_SCHEDULED ->
-                Unit
+                BgSaveResult.Scheduled
 
             response is RedisMessage.StringMessage ->
                 throw KedisException.WrongResponseException(
-                    message = "Expected \"${
-                        if (!schedule)
-                            RESULT_SUCCESS_STARTED
-                        else
-                            RESULT_SUCCESS_SCHEDULED
-                    }\", was \"${response.value}\"",
+                    message = "Expected \"$RESULT_SUCCESS_STARTED\" or \"$RESULT_SUCCESS_SCHEDULED\"," +
+                        " was \"${response.value}\"",
                 )
 
             response is RedisMessage.ErrorMessage ->
@@ -52,7 +47,7 @@ internal class BgSaveCommand(
         )
 
     companion object {
-        internal const val OPERATION_NAME = "APPEND"
+        internal const val OPERATION_NAME = "BGSAVE"
         internal const val ARG_SCHEDULE = "SCHEDULE"
         internal const val RESULT_SUCCESS_STARTED = "Background saving started"
         internal const val RESULT_SUCCESS_SCHEDULED = "Background saving scheduled"

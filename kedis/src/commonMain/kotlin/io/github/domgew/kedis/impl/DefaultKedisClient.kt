@@ -16,6 +16,7 @@ import io.github.domgew.kedis.commands.value.DecrByCommand
 import io.github.domgew.kedis.commands.value.DecrCommand
 import io.github.domgew.kedis.commands.value.DelCommand
 import io.github.domgew.kedis.commands.value.ExistsCommand
+import io.github.domgew.kedis.commands.value.ExpireTimeCommand
 import io.github.domgew.kedis.commands.value.GetBinaryCommand
 import io.github.domgew.kedis.commands.value.GetCommand
 import io.github.domgew.kedis.commands.value.GetRangeCommand
@@ -25,9 +26,12 @@ import io.github.domgew.kedis.commands.value.IncrCommand
 import io.github.domgew.kedis.commands.value.SetBinaryCommand
 import io.github.domgew.kedis.commands.value.SetCommand
 import io.github.domgew.kedis.commands.value.StrLenCommand
+import io.github.domgew.kedis.commands.value.TtlCommand
 import io.github.domgew.kedis.results.server.InfoSection
+import io.github.domgew.kedis.results.value.ExpireTimeResult
 import io.github.domgew.kedis.results.value.SetBinaryResult
 import io.github.domgew.kedis.results.value.SetResult
+import io.github.domgew.kedis.results.value.TtlResult
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -225,6 +229,30 @@ internal class DefaultKedisClient(
                     // when no keys, the response is clear even without the server
                     .takeUnless { it.isEmpty() }
                     ?: return@withLock 0,
+            ),
+        )
+    }
+
+    override suspend fun expireTime(
+        key: String,
+        inMilliseconds: Boolean,
+    ): ExpireTimeResult = lock.withLock {
+        executeCommand(
+            ExpireTimeCommand(
+                key = key,
+                inMilliseconds = inMilliseconds,
+            ),
+        )
+    }
+
+    override suspend fun ttl(
+        key: String,
+        inMilliseconds: Boolean,
+    ): TtlResult = lock.withLock {
+        executeCommand(
+            TtlCommand(
+                key = key,
+                inMilliseconds = inMilliseconds,
             ),
         )
     }

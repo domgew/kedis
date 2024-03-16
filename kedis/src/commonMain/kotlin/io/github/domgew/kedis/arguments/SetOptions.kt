@@ -3,7 +3,6 @@ package io.github.domgew.kedis.arguments
 import io.github.domgew.kedis.arguments.SetOptions.PreviousKeyHandling
 import io.github.domgew.kedis.impl.RedisMessage
 
-// TODO: add more tests
 public data class SetOptions(
     val previousKeyHandling: PreviousKeyHandling = PreviousKeyHandling.OVERRIDE,
 
