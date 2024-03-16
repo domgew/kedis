@@ -1,12 +1,13 @@
-package io.github.domgew.kedis.commands.value
+package io.github.domgew.kedis.commands.hash
 
 import io.github.domgew.kedis.KedisException
 import io.github.domgew.kedis.commands.KedisFullCommand
 import io.github.domgew.kedis.impl.RedisMessage
 
-// see https://redis.io/commands/strlen/
-internal class StrLenCommand(
+// see https://redis.io/commands/hset/
+internal class HashSetCommand(
     val key: String,
+    val fieldValues: Map<String, String>,
 ) : KedisFullCommand<Long> {
     override fun fromRedisResponse(response: RedisMessage): Long =
         when (response) {
@@ -20,7 +21,7 @@ internal class StrLenCommand(
 
             else ->
                 throw KedisException.WrongResponseException(
-                    message = "Expected integer response, was ${response::class.simpleName}",
+                    message = "Expected string response, was ${response::class.simpleName}",
                 )
         }
 
@@ -29,10 +30,18 @@ internal class StrLenCommand(
             value = listOf(
                 RedisMessage.BulkStringMessage(OPERATION_NAME),
                 RedisMessage.BulkStringMessage(key),
+                *fieldValues
+                    .flatMap {
+                        listOf(
+                            RedisMessage.BulkStringMessage(it.key),
+                            RedisMessage.BulkStringMessage(it.value),
+                        )
+                    }
+                    .toTypedArray(),
             ),
         )
 
     companion object {
-        private const val OPERATION_NAME = "STRLEN"
+        internal const val OPERATION_NAME = "HSET"
     }
 }

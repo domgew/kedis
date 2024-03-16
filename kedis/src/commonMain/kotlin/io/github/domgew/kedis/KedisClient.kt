@@ -351,4 +351,114 @@ public interface KedisClient : AutoCloseable {
         key: String,
         by: Double = 1.0,
     ): Double
+
+    /**
+     * Gets the value behind the given [field] in the [key] hash map.
+     *
+     * [https://redis.io/commands/hget/](https://redis.io/commands/hget/)
+     * @return The value or NULL
+     */
+    public suspend fun hashGet(
+        key: String,
+        field: String,
+    ): String?
+
+    /**
+     * Gets the value behind the given [field] in the [key] hash map.
+     *
+     * [https://redis.io/commands/hget/](https://redis.io/commands/hget/)
+     * @return The value or NULL
+     */
+    public suspend fun hashGetBinary(
+        key: String,
+        field: String,
+    ): ByteArray?
+
+    /**
+     * Gets the hash map behind the given [key].
+     *
+     * [https://redis.io/commands/hgetall/](https://redis.io/commands/hgetall/)
+     * @return The map or NULL
+     */
+    public suspend fun hashGetAll(
+        key: String,
+    ): Map<String, String>?
+
+    /**
+     * Gets the hash map behind the given [key].
+     *
+     * [https://redis.io/commands/hgetall/](https://redis.io/commands/hgetall/)
+     * @return The map or NULL
+     */
+    public suspend fun hashGetAllBinary(
+        key: String,
+    ): Map<String, ByteArray>?
+
+    /**
+     * Sets the given [fieldValues] on the hash map behind [key]. If the hash map does not exist, it is created.
+     *
+     * If the hash map already contains other field than those provided in [fieldValues], they are not removed. If the field is already present, it is overwritten.
+     *
+     * [https://redis.io/commands/hset/](https://redis.io/commands/hset/)
+     * @return The number of fields that were added (not just set)
+     */
+    public suspend fun hashSet(
+        key: String,
+        fieldValues: Map<String, String>,
+    ): Long
+
+    /**
+     * Sets the given [fieldValues] on the hash map behind [key]. If the hash map does not exist, it is created.
+     *
+     * If the hash map already contains other field than those provided in [fieldValues], they are not removed. If the field is already present, it is overwritten.
+     *
+     * [https://redis.io/commands/hset/](https://redis.io/commands/hset/)
+     * @return The number of fields that were added (not just set)
+     */
+    public suspend fun hashSetBinary(
+        key: String,
+        fieldValues: Map<String, ByteArray>,
+    ): Long
+
+    /**
+     * Removes the provided [field]s from the hash map behind [key]. If a [field] does not exist, no error is thrown.
+     *
+     * [https://redis.io/commands/hdel/](https://redis.io/commands/hdel/)
+     * @return The number of removed provided [field]s
+     */
+    public suspend fun hashDel(
+        key: String,
+        vararg field: String,
+    ): Long
+
+    /**
+     * Checks whether the given [field] exists on the hash map behind [key].
+     *
+     * [https://redis.io/commands/hexists/](https://redis.io/commands/hexists/)
+     * @return The number of provided [key]s that do exist
+     */
+    public suspend fun hashExists(
+        key: String,
+        field: String,
+    ): Boolean
+
+    /**
+     * Gets the fields of the hash map behind [key].
+     *
+     * [https://redis.io/commands/hkeys/](https://redis.io/commands/hkeys/)
+     * @return The field names
+     */
+    public suspend fun hashKeys(
+        key: String,
+    ): List<String>?
+
+    /**
+     * Gets the number of fields of the hash map behind [key].
+     *
+     * [https://redis.io/commands/hlen/](https://redis.io/commands/hlen/)
+     * @return The number of fields
+     */
+    public suspend fun hashLength(
+        key: String,
+    ): Long
 }

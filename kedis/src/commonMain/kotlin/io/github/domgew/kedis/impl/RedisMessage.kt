@@ -16,6 +16,9 @@ internal sealed class RedisMessage {
     data class SimpleStringMessage(
         override val value: String,
     ) : StringMessage() {
+        override val data: ByteArray
+            get() = value.encodeToByteArray()
+
         override suspend fun writeTo(outgoing: ByteWriteChannel) {
             outgoing.writeFully("+$value\r\n".encodeToByteArray())
         }
@@ -81,7 +84,7 @@ internal sealed class RedisMessage {
     }
 
     data class BulkStringMessage(
-        val data: ByteArray,
+        override val data: ByteArray,
     ) : StringMessage() {
         override val value: String
             get() = data.decodeToString()
@@ -356,6 +359,9 @@ internal sealed class RedisMessage {
         val type: String,
         override val value: String,
     ) : StringMessage() {
+        override val data: ByteArray
+            get() = value.encodeToByteArray()
+
         override suspend fun writeTo(outgoing: ByteWriteChannel) {
             val payloadBytes = "$type:$value".encodeToByteArray()
 
@@ -487,6 +493,7 @@ internal sealed class RedisMessage {
 
     sealed class StringMessage : RedisMessage() {
         abstract val value: String
+        abstract val data: ByteArray
     }
 
     sealed class NumericMessage : RedisMessage()

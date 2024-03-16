@@ -10,11 +10,8 @@ internal class GetBinaryCommand(
 ) : KedisFullCommand<ByteArray?> {
     override fun fromRedisResponse(response: RedisMessage): ByteArray? =
         when (response) {
-            is RedisMessage.BulkStringMessage ->
-                response.data
-
             is RedisMessage.StringMessage ->
-                response.value.encodeToByteArray()
+                response.data
 
             is RedisMessage.NullMessage ->
                 null
@@ -26,7 +23,7 @@ internal class GetBinaryCommand(
 
             else ->
                 throw KedisException.WrongResponseException(
-                    message = "Expected string or null response, was ${response::class}",
+                    message = "Expected string or null response, was ${response::class.simpleName}",
                 )
         }
 

@@ -22,7 +22,7 @@ internal class GetRangeCommand(
 
             else ->
                 throw KedisException.WrongResponseException(
-                    message = "Expected string or null response, was ${response::class}",
+                    message = "Expected string or null response, was ${response::class.simpleName}",
                 )
         }
 

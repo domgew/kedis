@@ -4,6 +4,16 @@ import io.github.domgew.kedis.KedisConfiguration
 import io.github.domgew.kedis.arguments.InfoSectionName
 import io.github.domgew.kedis.arguments.SetOptions
 import io.github.domgew.kedis.arguments.SyncOption
+import io.github.domgew.kedis.commands.hash.HashDelCommand
+import io.github.domgew.kedis.commands.hash.HashExistsCommand
+import io.github.domgew.kedis.commands.hash.HashGetAllBinaryCommand
+import io.github.domgew.kedis.commands.hash.HashGetAllCommand
+import io.github.domgew.kedis.commands.hash.HashGetBinaryCommand
+import io.github.domgew.kedis.commands.hash.HashGetCommand
+import io.github.domgew.kedis.commands.hash.HashKeysCommand
+import io.github.domgew.kedis.commands.hash.HashLengthCommand
+import io.github.domgew.kedis.commands.hash.HashSetBinaryCommand
+import io.github.domgew.kedis.commands.hash.HashSetCommand
 import io.github.domgew.kedis.commands.server.BgSaveCommand
 import io.github.domgew.kedis.commands.server.FlushCommand
 import io.github.domgew.kedis.commands.server.InfoCommand
@@ -331,6 +341,118 @@ internal class DefaultKedisClient(
             IncrByFloatCommand(
                 key = key,
                 by = by,
+            ),
+        )
+    }
+
+    override suspend fun hashGet(
+        key: String,
+        field: String,
+    ): String? = lock.withLock {
+        executeCommand(
+            HashGetCommand(
+                key = key,
+                field = field,
+            ),
+        )
+    }
+
+    override suspend fun hashGetBinary(
+        key: String,
+        field: String,
+    ): ByteArray? = lock.withLock {
+        executeCommand(
+            HashGetBinaryCommand(
+                key = key,
+                field = field,
+            ),
+        )
+    }
+
+    override suspend fun hashGetAll(
+        key: String,
+    ): Map<String, String>? = lock.withLock {
+        executeCommand(
+            HashGetAllCommand(
+                key = key,
+            ),
+        )
+    }
+
+    override suspend fun hashGetAllBinary(
+        key: String,
+    ): Map<String, ByteArray>? = lock.withLock {
+        executeCommand(
+            HashGetAllBinaryCommand(
+                key = key,
+            ),
+        )
+    }
+
+    override suspend fun hashSet(
+        key: String,
+        fieldValues: Map<String, String>,
+    ): Long = lock.withLock {
+        executeCommand(
+            HashSetCommand(
+                key = key,
+                fieldValues = fieldValues,
+            ),
+        )
+    }
+
+    override suspend fun hashSetBinary(
+        key: String,
+        fieldValues: Map<String, ByteArray>,
+    ): Long = lock.withLock {
+        executeCommand(
+            HashSetBinaryCommand(
+                key = key,
+                fieldValues = fieldValues,
+            ),
+        )
+    }
+
+    override suspend fun hashDel(
+        key: String,
+        vararg field: String,
+    ): Long = lock.withLock {
+        executeCommand(
+            HashDelCommand(
+                key = key,
+                fields = field.asList(),
+            ),
+        )
+    }
+
+    override suspend fun hashExists(
+        key: String,
+        field: String,
+    ): Boolean = lock.withLock {
+        executeCommand(
+            HashExistsCommand(
+                key = key,
+                field = field,
+            ),
+        )
+    }
+
+    override suspend fun hashKeys(
+        key: String,
+    ): List<String>? = lock.withLock {
+        executeCommand(
+            HashKeysCommand(
+                key = key,
+            ),
+        )
+    }
+
+    override suspend fun hashLength(
+        key: String,
+    ): Long = lock.withLock {
+        executeCommand(
+            HashLengthCommand(
+                key = key,
             ),
         )
     }

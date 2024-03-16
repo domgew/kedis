@@ -18,7 +18,7 @@ internal class InfoRawCommand(
 
             else ->
                 throw KedisException.WrongResponseException(
-                    message = "Expected string response, was ${response::class}",
+                    message = "Expected string response, was ${response::class.simpleName}",
                 )
         }
 

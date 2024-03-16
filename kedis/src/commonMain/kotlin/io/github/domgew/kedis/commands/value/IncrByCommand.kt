@@ -21,7 +21,7 @@ internal class IncrByCommand(
 
             else ->
                 throw KedisException.WrongResponseException(
-                    message = "Expected integer response, was ${response::class}",
+                    message = "Expected integer response, was ${response::class.simpleName}",
                 )
         }
 

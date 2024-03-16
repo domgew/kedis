@@ -1,13 +1,17 @@
-package io.github.domgew.kedis.commands.server
+package io.github.domgew.kedis.commands.hash
 
 import io.github.domgew.kedis.KedisException
 import io.github.domgew.kedis.commands.KedisFullCommand
 import io.github.domgew.kedis.impl.RedisMessage
 
-internal class WhoAmICommand : KedisFullCommand<String> {
-    override fun fromRedisResponse(response: RedisMessage): String =
+// see https://redis.io/commands/hdel/
+internal class HashDelCommand(
+    val key: String,
+    val fields: List<String>,
+) : KedisFullCommand<Long> {
+    override fun fromRedisResponse(response: RedisMessage): Long =
         when (response) {
-            is RedisMessage.StringMessage ->
+            is RedisMessage.IntegerMessage ->
                 response.value
 
             is RedisMessage.ErrorMessage ->
@@ -17,20 +21,22 @@ internal class WhoAmICommand : KedisFullCommand<String> {
 
             else ->
                 throw KedisException.WrongResponseException(
-                    message = "Expected string response, was ${response::class.simpleName}",
+                    message = "Expected integer response, was ${response::class.simpleName}",
                 )
         }
 
     override fun toRedisRequest(): RedisMessage =
         RedisMessage.ArrayMessage(
-            value = listOfNotNull(
-                RedisMessage.BulkStringMessage(OPERATION_GROUP_NAME),
+            value = listOf(
                 RedisMessage.BulkStringMessage(OPERATION_NAME),
+                RedisMessage.BulkStringMessage(key),
+                *fields
+                    .map { RedisMessage.BulkStringMessage(it) }
+                    .toTypedArray(),
             ),
         )
 
     companion object {
-        private const val OPERATION_GROUP_NAME = "ACL"
-        private const val OPERATION_NAME = "WHOAMI"
+        private const val OPERATION_NAME = "HDEL"
     }
 }
