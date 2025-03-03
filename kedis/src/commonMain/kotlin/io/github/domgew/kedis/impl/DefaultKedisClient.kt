@@ -24,6 +24,7 @@ import io.github.domgew.kedis.commands.server.InfoCommand
 import io.github.domgew.kedis.commands.server.InfoMapCommand
 import io.github.domgew.kedis.commands.server.InfoRawCommand
 import io.github.domgew.kedis.commands.server.PingCommand
+import io.github.domgew.kedis.commands.server.SelectCommand
 import io.github.domgew.kedis.commands.server.WhoAmICommand
 import io.github.domgew.kedis.commands.value.AppendCommand
 import io.github.domgew.kedis.commands.value.DecrByCommand
@@ -79,6 +80,12 @@ internal class DefaultKedisClient(
                 content = content,
             ),
         )
+    }
+
+    override suspend fun select(
+        index: Int
+    )  = lock.withLock{
+        executeCommand(SelectCommand(index))
     }
 
     override suspend fun auth(

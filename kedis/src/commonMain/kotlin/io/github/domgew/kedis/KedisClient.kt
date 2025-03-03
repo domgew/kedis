@@ -66,6 +66,10 @@ public interface KedisClient : AutoCloseable {
         content: String = "PING",
     ): String
 
+    public suspend fun select(
+        index: Int,
+    )
+
     /**
      * Authenticates the connection to the server or throws an exception when it failed.
      *
