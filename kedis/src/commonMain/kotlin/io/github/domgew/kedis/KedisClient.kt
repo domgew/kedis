@@ -66,6 +66,12 @@ public interface KedisClient : AutoCloseable {
         content: String = "PING",
     ): String
 
+    /**
+     * Select the Redis database with the specified index.
+     *
+     * [https://redis.io/commands/select/](https://redis.io/commands/select/)
+     * @return  Whether the operation was successful
+     */
     public suspend fun select(
         index: Int,
     )
