@@ -1,5 +1,6 @@
 package io.github.domgew.kedis
 
+import io.github.domgew.kedis.arguments.ExpireOptions
 import io.github.domgew.kedis.arguments.InfoSectionName
 import io.github.domgew.kedis.arguments.json.JsonGetOptions
 import io.github.domgew.kedis.arguments.json.JsonSetOptions
@@ -248,6 +249,20 @@ public interface KedisClient : AutoCloseable {
     public suspend fun exists(
         vararg key: String,
     ): Long
+
+    /**
+     * Sets a timeout on a key in seconds
+     *
+     * @param seconds the time in seconds
+     * @return Whether the operation was successful
+     *
+     * [https://redis.io/commands/expire/](https://redis.io/commands/expire/)
+     * */
+    public suspend fun expire(
+        key: String,
+        seconds: Int,
+        options: ExpireOptions
+    ): ExpireTimeResult
 
     /**
      * Gets the time in UNIX seconds or milliseconds - depending on the [inMilliseconds] argument - when the given [key] expires.

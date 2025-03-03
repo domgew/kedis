@@ -1,5 +1,6 @@
 package io.github.domgew.kedis
 
+import io.github.domgew.kedis.arguments.ExpireOptions
 import io.github.domgew.kedis.arguments.InfoSectionName
 import io.github.domgew.kedis.arguments.SetOptions
 import io.github.domgew.kedis.arguments.SyncOption
@@ -20,7 +21,9 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
+import kotlin.time.measureTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
@@ -528,4 +531,35 @@ class SimpleE2ETest {
             client.closeSuspended()
         }
     }
+
+    @Test
+    fun expire() = runTest {
+        withContext(Dispatchers.Default) {
+            val client = KedisClient.newClient(
+                KedisConfiguration(
+                    endpoint = KedisConfiguration.Endpoint.HostPort(
+                        host = "127.0.0.1",
+                        port = TestConfigUtil.getPort(),
+                    ),
+                    authentication = KedisConfiguration.Authentication.NoAutoAuth,
+                    connectionTimeoutMillis = 2_000L,
+                ),
+            )
+
+            val seconds = 10
+
+            val instant = Clock.System.now()
+                .plus(seconds.seconds)
+            val result: ExpireTimeResult
+            val difference = measureTime {
+                client.set(key = "test", value = "abc")
+                client.expire(key = "test", seconds = seconds, options = ExpireOptions())
+                result = client.expireTime(key = "test", inMilliseconds = false)
+            }
+
+            assertEquals(ExpireTimeResult.AtUnixSecond(seconds = instant.plus(difference).epochSeconds),result)
+            client.closeSuspended()
+        }
+    }
+
 }

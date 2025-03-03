@@ -12,6 +12,8 @@ package io.github.domgew.kedis.results.value
  */
 public sealed interface ExpireTimeResult {
 
+    public data object Set : ExpireTimeResult
+
     public data object NotFound : ExpireTimeResult
 
     public data object Never : ExpireTimeResult

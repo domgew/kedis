@@ -1,6 +1,7 @@
 package io.github.domgew.kedis.impl
 
 import io.github.domgew.kedis.KedisConfiguration
+import io.github.domgew.kedis.arguments.ExpireOptions
 import io.github.domgew.kedis.arguments.InfoSectionName
 import io.github.domgew.kedis.arguments.json.JsonGetOptions
 import io.github.domgew.kedis.arguments.json.JsonSetOptions
@@ -31,6 +32,7 @@ import io.github.domgew.kedis.commands.value.DecrByCommand
 import io.github.domgew.kedis.commands.value.DecrCommand
 import io.github.domgew.kedis.commands.value.DelCommand
 import io.github.domgew.kedis.commands.value.ExistsCommand
+import io.github.domgew.kedis.commands.value.ExpireCommand
 import io.github.domgew.kedis.commands.value.ExpireTimeCommand
 import io.github.domgew.kedis.commands.value.GetBinaryCommand
 import io.github.domgew.kedis.commands.value.GetCommand
@@ -252,6 +254,18 @@ internal class DefaultKedisClient(
                     ?: return@withLock 0,
             ),
         )
+    }
+
+    override suspend fun expire(
+        key: String,
+        seconds: Int,
+        options: ExpireOptions
+    ): ExpireTimeResult = lock.withLock {
+        executeCommand(ExpireCommand(
+            key = key,
+            seconds = seconds,
+            options = options
+        ))
     }
 
     override suspend fun expireTime(
