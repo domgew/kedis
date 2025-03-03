@@ -2,6 +2,8 @@ package io.github.domgew.kedis.impl
 
 import io.github.domgew.kedis.KedisConfiguration
 import io.github.domgew.kedis.arguments.InfoSectionName
+import io.github.domgew.kedis.arguments.json.JsonGetOptions
+import io.github.domgew.kedis.arguments.json.JsonSetOptions
 import io.github.domgew.kedis.arguments.SetOptions
 import io.github.domgew.kedis.arguments.SyncOption
 import io.github.domgew.kedis.commands.hash.HashDelCommand
@@ -14,6 +16,8 @@ import io.github.domgew.kedis.commands.hash.HashKeysCommand
 import io.github.domgew.kedis.commands.hash.HashLengthCommand
 import io.github.domgew.kedis.commands.hash.HashSetBinaryCommand
 import io.github.domgew.kedis.commands.hash.HashSetCommand
+import io.github.domgew.kedis.commands.json.JsonGetCommand
+import io.github.domgew.kedis.commands.json.JsonSetCommand
 import io.github.domgew.kedis.commands.server.BgSaveCommand
 import io.github.domgew.kedis.commands.server.FlushCommand
 import io.github.domgew.kedis.commands.server.InfoCommand
@@ -456,4 +460,31 @@ internal class DefaultKedisClient(
             ),
         )
     }
+
+    override suspend fun jsonGet(
+        key: String,
+        path: String,
+        options: JsonGetOptions,
+    ): String? = lock.withLock {
+        executeCommand(JsonGetCommand(
+            key = key,
+            path = path,
+            options = options
+        ))
+    }
+
+    override suspend fun jsonSet(
+        key: String,
+        path: String,
+        value: String,
+        options: JsonSetOptions
+    ): SetResult = lock.withLock{
+        executeCommand(JsonSetCommand(
+            key = key,
+            path = path,
+            value = value,
+            options = JsonSetOptions()
+        ))
+    }
+
 }

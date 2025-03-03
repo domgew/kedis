@@ -1,6 +1,8 @@
 package io.github.domgew.kedis
 
 import io.github.domgew.kedis.arguments.InfoSectionName
+import io.github.domgew.kedis.arguments.json.JsonGetOptions
+import io.github.domgew.kedis.arguments.json.JsonSetOptions
 import io.github.domgew.kedis.arguments.SetOptions
 import io.github.domgew.kedis.arguments.SyncOption
 import io.github.domgew.kedis.impl.DefaultKedisClient
@@ -468,4 +470,30 @@ public interface KedisClient : AutoCloseable {
     public suspend fun hashLength(
         key: String,
     ): Long
+
+    /**
+     * Gets the JSON value behind the given [key].
+     *
+     * [https://redis.io/commands/json.get/](https://redis.io/commands/json.get/)
+     * @return the value at path in JSON serialized form
+     */
+    public suspend fun jsonGet(
+        key: String,
+        path: String,
+        options: JsonGetOptions,
+    ): String?
+
+    /**
+     * Sets the value behind the given [key], minding the [options].
+     *
+     * [https://redis.io/commands/json.set/](https://redis.io/commands/json.set/)
+     * @return Whether the operation was successful
+     */
+    public suspend fun jsonSet(
+        key: String,
+        path: String,
+        value: String,
+        options: JsonSetOptions
+    ): SetResult
+
 }

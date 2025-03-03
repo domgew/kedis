@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kover)
+    alias(libs.plugins.serialization)
     `maven-publish`
     signing
 }
@@ -52,6 +53,7 @@ kotlin {
                 api(libs.kotlinx.coroutines.core)
                 implementation(libs.ktor.network)
                 api(libs.bignum)
+                api(libs.kotlinx.serialization.json)
             }
         }
         val commonTest by getting {
@@ -60,6 +62,7 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(libs.kotlinx.datetime)
                 implementation(libs.semVer)
+                implementation(libs.kotlinx.serialization.json)
             }
         }
     }
