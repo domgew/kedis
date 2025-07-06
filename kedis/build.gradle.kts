@@ -47,7 +47,7 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation(libs.kotlin.stdlib)
                 api(libs.kotlinx.coroutines.core)
@@ -55,11 +55,10 @@ kotlin {
                 api(libs.bignum)
             }
         }
-        val commonTest by getting {
+        commonTest {
             dependencies {
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.coroutines.test)
-                implementation(libs.kotlinx.datetime)
                 implementation(libs.semVer)
             }
         }

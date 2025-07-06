@@ -2,7 +2,6 @@
 kotlin = "2.2.0"
 
 kotlinx-coroutines = "1.10.2"
-kotlinx-datetime = "0.6.2"
 
 ktor = "3.2.1"
 
@@ -10,7 +9,6 @@ bignum = "0.3.10"
 semVer = "2.1.0"
 
 kop = "0.0.3"
-kotlin-logging = "7.0.4"
 logback = "1.5.18"
 
 dokka = "2.0.0"
@@ -23,7 +21,6 @@ kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.re
 
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
-kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
 
 ktor-network = { group = "io.ktor", name = "ktor-network", version.ref = "ktor" }
 ktor-server-core = { group = "io.ktor", name = "ktor-server-core", version.ref = "ktor" }
@@ -33,7 +30,6 @@ bignum = { group = "com.ionspin.kotlin", name = "bignum", version.ref = "bignum"
 semVer = { group = "net.swiftzer.semver", name = "semver", version.ref = "semVer" }
 
 kop = { group = "io.github.domgew", name = "kop", version.ref = "kop" }
-kotlin-logging = { group = "io.github.oshai", name = "kotlin-logging", version.ref = "kotlin-logging" }
 logback = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
 
 [plugins]

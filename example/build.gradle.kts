@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 
@@ -7,7 +8,7 @@ plugins {
 
 kotlin {
     jvm {
-        withJava()
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         mainRun {
             mainClass.set("MainKt")
         }
@@ -21,17 +22,18 @@ kotlin {
     }
 
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
                 implementation(project(":kedis"))
                 implementation(libs.kop)
                 implementation(libs.ktor.server.core)
                 implementation(libs.ktor.server.cio)
-                implementation(libs.kotlin.logging)
             }
         }
-        val nativeMain by creating {}
-        val jvmMain by getting {
+
+        nativeMain {
+        }
+        jvmMain {
             dependencies {
                 implementation(libs.logback)
             }

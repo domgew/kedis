@@ -22,15 +22,17 @@ import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
 import kotlin.time.TimeSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import net.swiftzer.semver.SemVer
 
+@OptIn(ExperimentalTime::class)
 class SimpleE2ETest {
 
     @Test
@@ -372,8 +374,9 @@ class SimpleE2ETest {
                     )
 
                     // SECONDS
-
-                    val atSeconds = Clock.System.now().epochSeconds + 31
+                    val atSeconds = Clock.System
+                        .now()
+                        .epochSeconds + 31
 
                     client.execute(
                         command = KedisValueCommands.set(
