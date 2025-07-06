@@ -5,4 +5,10 @@ updates:
     schedule:
       interval: "weekly"
     assignees:
-      - domgew
+      - "domgew"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    assignees:
+      - "domgew"

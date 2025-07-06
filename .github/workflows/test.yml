@@ -58,7 +58,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: test-${{ github.head_ref }}-${{ github.sha }}-${{ matrix.os }}-redis-6
+          name: test-${{ github.sha }}-${{ matrix.os }}-redis-6
           path: |
             kedis/build/test-results/
             kedis/build/reports/tests/
@@ -74,7 +74,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: test-${{ github.head_ref }}-${{ github.sha }}-${{ matrix.os }}-redis-7
+          name: test-${{ github.sha }}-${{ matrix.os }}-redis-7
           path: |
             kedis/build/test-results/
             kedis/build/reports/tests/
