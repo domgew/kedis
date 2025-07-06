@@ -12,6 +12,7 @@ provides native and JVM sockets with a unified interface.
 
 * [Installation](#installation)
 * [Documentation](#documentation)
+* [Quick Start](#quick-start)
 * [Targets](#targets)
 * [Library Comparison](#library-comparison)
 * [Examples](#examples)
@@ -43,6 +44,110 @@ repositories {
 
 See Dokka-generated [docs](https://javadoc.io/doc/io.github.domgew/kedis/latest/kedis/io.github.domgew.kedis/index.html).
 For available commands see the documentation of the `commands` package and the KedisConfiguration for the available configuration options.
+
+## Quick Start
+
+### With Sealed Polymorphism
+
+```kotlin
+KedisClient(
+    configuration = KedisConfiguration(
+        // OR: KedisConfiguration.Endpoint.UnixSocket(path)
+        endpoint = KedisConfiguration.Endpoint.HostPort(
+            host = "127.0.0.1",
+            port = 6379, // optional, 6379 is the default
+        ),
+        // OR: KedisConfiguration.Authentication.NoAutoAuth
+        authication = KedisConfiguration.Authentication.AutoAuth(
+            password = "secret",
+            username = "admin", // optional
+        ),
+        connectionTimeout = 250.milliseconds,
+        keepAlive = true, // optional, true is the default
+        databaseIndex = 1, // optional, 0 is the default
+    ),
+)
+    .use { client ->
+        val testValue = client.execute(
+            KedisValueCommands.get(
+                key = "test",
+            ),
+        )
+            ?.let {
+                "'$it'"
+            }
+            ?: "NULL"
+        println("Test value: $testValue")
+    }
+```
+
+### With DSL-Style Builder
+
+```kotlin
+KedisClient.builder {
+    // OR: unixSocket
+    hostAndPort(
+        host = "127.0.0.1",
+        port = 6379, // optional, 6379 is the default
+    )
+    // OR: noAutoAuth (optional)
+    autoAuth(
+        password = "secret",
+        username = "admin", // optional
+    )
+    connectTimeout = 250.milliseconds
+    keepAlive = true // optional, true is the default
+    databaseIndex = 1 // optional, 0 is the default
+}
+    .use { client ->
+        val testValue = client.execute(
+            KedisValueCommands.get(
+                key = "test",
+            ),
+        )
+            ?.let {
+                "'$it'"
+            }
+            ?: "NULL"
+        println("Test value: $testValue")
+    }
+```
+
+### With Connection Pool
+
+Additional library ([io.github.domgew:kop](https://github.com/domgew/kop)) needed.
+
+```kotlin
+KotlinObjectPool(
+    KotlinObjectPoolConfig(
+        maxSize = 3,
+        keepAliveFor = 2.minutes,
+        strategy = KotlinObjectPoolStrategy.LIFO, // OR: FIFO
+    ),
+) {
+    // OR: KedisClient(configuration)
+    KedisClient.builder {
+        hostAndPort("127.0.0.1", 6379)
+        noAutoAuth()
+        connectTimeout = 250.milliseconds
+        keepAlive = true
+    }
+}
+    .use { pool ->
+        val testValue = pool.withObject { client ->
+            client.execute(
+                KedisValueCommands.get(
+                    key = "test",
+                ),
+            )
+        }
+            ?.let {
+                "'$it'"
+            }
+            ?: "NULL"
+        println("Test value: $testValue")
+    }
+```
 
 ## Targets
 
