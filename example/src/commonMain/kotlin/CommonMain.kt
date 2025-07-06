@@ -1,5 +1,4 @@
 import io.github.domgew.kedis.KedisClient
-import io.github.domgew.kedis.KedisConfiguration
 import io.github.domgew.kedis.arguments.server.SyncOption
 import io.github.domgew.kedis.arguments.value.SetOptions
 import io.github.domgew.kedis.commands.KedisServerCommands
@@ -44,17 +43,12 @@ fun commonMain() {
             ),
         ) {
             println("kedisPool: Creating new instance")
-            KedisClient(
-                configuration = KedisConfiguration(
-                    endpoint = KedisConfiguration.Endpoint.HostPort(
-                        host = "127.0.0.1",
-                        port = 6379,
-                    ),
-                    authentication = KedisConfiguration.Authentication.NoAutoAuth,
-                    connectionTimeout = 250.milliseconds,
-                    keepAlive = true,
-                ),
-            )
+            KedisClient.builder {
+                hostAndPort("127.0.0.1", 6379)
+                noAutoAuth()
+                connectTimeout = 250.milliseconds
+                keepAlive = true
+            }
         }
 
         routing {

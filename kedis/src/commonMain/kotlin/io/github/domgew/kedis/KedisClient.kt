@@ -1,5 +1,6 @@
 package io.github.domgew.kedis
 
+import io.github.domgew.kedis.KedisClient.Companion.builder
 import io.github.domgew.kedis.KedisClient.Companion.invoke
 import io.github.domgew.kedis.KedisClient.Companion.newClient
 import io.github.domgew.kedis.arguments.server.InfoSectionName
@@ -22,11 +23,12 @@ import kotlinx.coroutines.IO
 
 /**
  * The public interface of the client.
- * Use [KedisClient.newClient] or [KedisClient.invoke] to create an instance.
+ * Use [KedisClient.newClient], [KedisClient.builder], or [KedisClient.invoke] to create an instance.
  * See [io.github.domgew.kedis.commands] for available commands.
  *
  * @see KedisClient.newClient
  * @see KedisClient.invoke
+ * @see KedisClient.builder
  * @see io.github.domgew.kedis.commands
  */
 public interface KedisClient : AutoCloseable {
@@ -40,6 +42,7 @@ public interface KedisClient : AutoCloseable {
          * Each command (method) will connect automatically, when the connection is not already open.
          *
          * @see invoke
+         * @see builder
          */
         public fun newClient(
             configuration: KedisConfiguration,
@@ -58,6 +61,7 @@ public interface KedisClient : AutoCloseable {
          * Each command (method) will connect automatically, when the connection is not already open.
          *
          * @see newClient
+         * @see builder
          */
         public operator fun invoke(
             configuration: KedisConfiguration,
@@ -65,6 +69,25 @@ public interface KedisClient : AutoCloseable {
             newClient(
                 configuration = configuration,
             )
+
+        /**
+         * Creates a new client instance without connecting.
+         *
+         * When you connect the client, make sure to disconnect/[close] it again.
+         * Each command (method) will connect automatically, when the connection is not already open.
+         *
+         * @see newClient
+         * @see invoke
+         * @throws KedisBuilder.MissingConfig
+         */
+        public fun builder(
+            config: KedisBuilder.() -> Unit,
+        ): KedisClient =
+            KedisBuilder()
+                .also {
+                    it.config()
+                }
+                .build()
 
         internal fun newClient(
             configuration: KedisConfiguration,
