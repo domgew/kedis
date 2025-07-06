@@ -18,3 +18,25 @@ suspend fun KedisClient.getRedisVersion(): SemVer? =
         ?.let {
             SemVer.parseOrNull(it)
         }
+
+suspend fun KedisClient.hasJsonSupport(): Boolean {
+    val regex = Regex("^module:name=([^,]+),")
+
+    return execute(
+        command = KedisServerCommands.infoRaw(
+            InfoSectionName.MODULES,
+        ),
+    )
+        ?.split("\n")
+        ?.any {
+            regex.find(it)
+                ?.groupValues
+                ?.getOrNull(1)
+                ?.contains(
+                    "json",
+                    ignoreCase = true,
+                )
+                ?: false
+        }
+        ?: false
+}

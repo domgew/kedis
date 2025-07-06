@@ -21,11 +21,16 @@ jobs:
     runs-on: ubuntu-latest
     services:
       redis6:
-        image: redis:6-alpine
+        # oldest redis-stack: redis/redis-stack:6.2.0-v1
+        # latest redis-stack 6: redis/redis-stack:6.2.6-v9
+        # latest redis 6: redis:6-alpine
+        image: redis/redis-stack:6.2.0-v1
         ports:
           - 6380:6379
       redis7:
-        image: redis:7-alpine
+        # latest redis-stack 7: redis/redis-stack:7.4.0-v5
+        # latest redis 7: redis:7-alpine
+        image: redis/redis-stack:7.4.0-v5
         ports:
           - 6381:6379
     steps:
