@@ -87,6 +87,16 @@ public interface KedisClient : AutoCloseable {
     public val probablyConnected: Boolean
 
     /**
+     * The currently selected database. It is the client's best estimate.
+     *
+     * Only valid while connected and no select command is currently being executed.
+     *
+     * @see KedisConfiguration.databaseIndex
+     * @see KedisServerCommands.select
+     */
+    public val selectedDatabase: Int
+
+    /**
      * Manually ensures that the client is connected. When [isConnected] is true, nothing happens, otherwise the connection is established.
      */
     public suspend fun connect()

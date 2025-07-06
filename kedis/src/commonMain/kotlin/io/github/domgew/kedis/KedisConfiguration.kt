@@ -23,6 +23,11 @@ public data class KedisConfiguration(
      * Whether to keep the socket connection alive.
      */
     val keepAlive: Boolean = true,
+
+    /**
+     * Which database to use by index.
+     */
+    val databaseIndex: Int = 0,
 ) {
 
     @Deprecated(

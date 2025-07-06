@@ -4,11 +4,13 @@ import io.github.domgew.kedis.KedisException
 import io.github.domgew.kedis.commands.KedisFullCommand
 import io.github.domgew.kedis.impl.RedisMessage
 
-internal class AuthCommand(
-    val username: String?,
-    val password: String,
+internal class SelectCommand(
+    val databaseIndex: Int,
 ) : KedisFullCommand<Unit> {
-    override fun fromRedisResponse(response: RedisMessage): Unit =
+
+    override fun fromRedisResponse(
+        response: RedisMessage,
+    ): Unit =
         when {
             response is RedisMessage.StringMessage
                 && response.value == "OK" ->
@@ -29,13 +31,13 @@ internal class AuthCommand(
         RedisMessage.ArrayMessage(
             value = listOfNotNull(
                 RedisMessage.BulkStringMessage(OPERATION_NAME),
-                username
-                    ?.let { RedisMessage.BulkStringMessage(it) },
-                RedisMessage.BulkStringMessage(password),
+                RedisMessage.BulkStringMessage(
+                    value = databaseIndex.toString(),
+                ),
             ),
         )
 
     companion object {
-        private const val OPERATION_NAME = "AUTH"
+        private const val OPERATION_NAME = "SELECT"
     }
 }

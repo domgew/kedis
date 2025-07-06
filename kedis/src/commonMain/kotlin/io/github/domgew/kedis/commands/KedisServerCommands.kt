@@ -9,6 +9,7 @@ import io.github.domgew.kedis.commands.server.InfoCommand
 import io.github.domgew.kedis.commands.server.InfoMapCommand
 import io.github.domgew.kedis.commands.server.InfoRawCommand
 import io.github.domgew.kedis.commands.server.PingCommand
+import io.github.domgew.kedis.commands.server.SelectCommand
 import io.github.domgew.kedis.commands.server.WhoAmICommand
 import io.github.domgew.kedis.results.server.BgSaveResult
 import io.github.domgew.kedis.results.server.InfoSection
@@ -119,6 +120,18 @@ public object KedisServerCommands {
     ): KedisCommand<String> =
         PingCommand(
             content = content,
+        )
+
+    /**
+     * Selects the redis database to use by [databaseIndex]. Default database is 0.
+     *
+     * [https://redis.io/commands/select/](https://redis.io/commands/select/)
+     */
+    public fun select(
+        databaseIndex: Int,
+    ): KedisCommand<Unit> =
+        SelectCommand(
+            databaseIndex = databaseIndex,
         )
 
     /**

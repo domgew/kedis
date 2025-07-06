@@ -4,6 +4,7 @@ import io.github.domgew.kedis.KedisConfiguration
 import io.github.domgew.kedis.KedisException
 import io.github.domgew.kedis.commands.KedisFullCommand
 import io.github.domgew.kedis.commands.server.AuthCommand
+import io.github.domgew.kedis.commands.server.SelectCommand
 import io.ktor.network.selector.SelectorManager
 import io.ktor.network.sockets.InetSocketAddress
 import io.ktor.network.sockets.SocketAddress
@@ -31,6 +32,9 @@ internal class BaseKedisClient(
     }
     private val _readLock = Mutex()
     private val _writeLock = Mutex()
+
+    var selectedDatabase: Int = configuration.databaseIndex
+        private set
 
     val probablyConnected: Boolean
         get() =
@@ -137,20 +141,45 @@ internal class BaseKedisClient(
             return command.fromRedisResponse(
                 response = response,
             )
+                .also {
+                    if (command is SelectCommand) {
+                        selectedDatabase = command.databaseIndex
+                    }
+                }
         }
     }
 
     private suspend fun connected(
         connection: KedisConnection.UsableConnection,
     ): Throwable? {
+        selectedDatabase = 0
+        autoAuth(
+            connection = connection,
+        )
+            ?.also {
+                return it
+            }
+        autoSelectDatabase(
+            connection = connection,
+        )
+            ?.also {
+                return it
+            }
+
+        return null
+    }
+
+    private suspend fun autoAuth(
+        connection: KedisConnection.UsableConnection,
+    ): Throwable? =
         when (
             val auth = configuration.authentication
         ) {
             KedisConfiguration.Authentication.NoAutoAuth ->
-                return null
+                null
 
             is KedisConfiguration.Authentication.AutoAuth -> {
-                return runCatching {
+                runCatching {
                     val command = AuthCommand(
                         username = auth.username,
                         password = auth.password,
@@ -171,7 +200,36 @@ internal class BaseKedisClient(
                     .exceptionOrNull()
             }
         }
-    }
+
+    private suspend fun autoSelectDatabase(
+        connection: KedisConnection.UsableConnection,
+    ): Throwable? =
+        when (
+            val index = configuration.databaseIndex
+        ) {
+            0 ->
+                null
+
+            else ->
+                runCatching {
+                    val command = SelectCommand(
+                        databaseIndex = index,
+                    )
+
+                    doWriteCommand(
+                        connection = connection,
+                        command = command,
+                    )
+                    doFlush(
+                        connection = connection,
+                    )
+                    doReadCommand(
+                        connection = connection,
+                        command = command,
+                    )
+                }
+                    .exceptionOrNull()
+        }
 
     override fun close() {
         if (!_connection.isInitialized()) {

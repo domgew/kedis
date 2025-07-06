@@ -28,6 +28,17 @@ internal class DefaultKedisClient(
 
     override val isConnected: Boolean by ::probablyConnected
 
+    override val selectedDatabase: Int
+        get() =
+            when {
+                _client.isInitialized() ->
+                    _client.value
+                        .selectedDatabase
+
+                else ->
+                    0
+            }
+
     override suspend fun connect() {
         _client.value
             .connect()

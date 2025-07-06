@@ -107,7 +107,7 @@ internal class KedisConnection(
                         }
                 }
             }
-        } catch (ex: TimeoutCancellationException) {
+        } catch (_: TimeoutCancellationException) {
             throw KedisException.ConnectionTimeoutException()
         }
 
