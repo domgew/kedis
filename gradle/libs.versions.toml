@@ -2,7 +2,7 @@
 kotlin = "2.2.0"
 
 kotlinx-coroutines = "1.10.2"
-kotlinx-datetime = "0.6.2"
+kotlinx-datetime = "0.7.0-0.6.x-compat"
 
 ktor = "3.2.1"
 
