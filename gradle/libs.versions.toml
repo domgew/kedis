@@ -15,6 +15,7 @@ logback = "1.5.16"
 
 dokka = "2.0.0"
 kover = "0.9.1"
+vanniktech-mavenPublish = "0.33.0"
 
 [libraries]
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
@@ -39,3 +40,4 @@ logback = { group = "ch.qos.logback", name = "logback-classic", version.ref = "l
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+vanniktech-mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "vanniktech-mavenPublish" }

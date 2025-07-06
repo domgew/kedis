@@ -1,3 +1,5 @@
+import com.vanniktech.maven.publish.JavadocJar
+import com.vanniktech.maven.publish.KotlinMultiplatform
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.konan.target.HostManager
@@ -7,8 +9,7 @@ plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kover)
-    `maven-publish`
-    signing
+    alias(libs.plugins.vanniktech.mavenPublish)
 }
 
 group = "io.github.domgew"
@@ -85,10 +86,8 @@ fun KotlinMultiplatformExtension.addNativeTargets(
     }
 }
 
-val dokkaOutputDir = layout.buildDirectory.dir("dokka")
 dokka {
     dokkaPublications.html {
-        outputDirectory.set(dokkaOutputDir)
     }
 
     dokkaSourceSets {
@@ -100,100 +99,61 @@ dokka {
         }
     }
 }
-val deleteDokkaOutputDir by tasks.register<Delete>("deleteDokkaOutputDirectory") {
-    this.delete(dokkaOutputDir)
-}
-val javadocJar = tasks.register<Jar>("javadocJar") {
-    dependsOn(
-        deleteDokkaOutputDir,
-        tasks.getByName("dokkaGeneratePublicationHtml"),
-    )
-    archiveClassifier.set("javadoc")
-    from(dokkaOutputDir)
-}
 
-publishing {
-    publications {
-        withType<MavenPublication> {
-            artifact(javadocJar)
-            pom {
-                name.set("Kedis")
-                description.set("Redis client library for Kotlin Multiplatform (JVM + Native)")
-                url.set("https://github.com/domgew/kedis")
-                scm {
-                    url.set("https://github.com/domgew/kedis")
-                    connection.set("scm:git:git://github.com/domgew/kedis.git")
-                    developerConnection.set("scm:git:ssh://github.com:domgew/kedis.git")
-                }
-                licenses {
-                    license {
-                        name.set("MIT")
-                        url.set("https://opensource.org/licenses/MIT")
-                    }
-                }
-                issueManagement {
-                    system.set("Github")
-                    url.set("https://github.com/domgew/kedis/issues")
-                }
-                developers {
-                    developer {
-                        name.set("domgew")
-                        email.set("44265359+domgew@users.noreply.github.com")
-                    }
-                }
+// https://www.jetbrains.com/help/kotlin-multiplatform-dev/multiplatform-publish-libraries.html#set-up-the-publishing-plugin
+// https://vanniktech.github.io/gradle-maven-publish-plugin/what/#kotlin-multiplatform-library
+mavenPublishing {
+    configure(
+        platform = KotlinMultiplatform(
+            javadocJar = JavadocJar.Dokka(
+                taskName = "dokkaGeneratePublicationHtml",
+            ),
+            sourcesJar = true,
+        ),
+    )
+
+    publishToMavenCentral(
+        automaticRelease = false,
+    )
+    signAllPublications()
+    coordinates(
+        groupId = project.group
+            .toString(),
+        artifactId = "kedis",
+        version = project.version
+            .toString(),
+    )
+
+    pom {
+        name = "Kedis"
+        description = "Redis client library for Kotlin Multiplatform (JVM + Native)"
+        url = "https://github.com/domgew/kedis"
+        scm {
+            url = "https://github.com/domgew/kedis"
+            connection = "scm:git:git://github.com/domgew/kedis.git"
+            developerConnection = "scm:git:ssh://github.com:domgew/kedis.git"
+        }
+        licenses {
+            license {
+                name = "MIT"
+                url = "https://opensource.org/licenses/MIT"
             }
         }
-    }
-
-    repositories {
-        if (System.getenv("IS_CI") != "yes") {
-            mavenLocal()
-        } else {
-            // see https://medium.com/kodein-koders/publish-a-kotlin-multiplatform-library-on-maven-central-6e8a394b7030
-            maven {
-                name = "oss"
-
-                val releasesRepoUrl = uri(
-                    "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/",
-                )
-                val snapshotsRepoUrl = uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
-                url =
-                    if (
-                        version.toString()
-                            .endsWith("SNAPSHOT")
-                    )
-                        snapshotsRepoUrl
-                    else
-                        releasesRepoUrl
-
-                credentials {
-                    username = System.getenv("SONATYPE_USER")
-                        ?.trim()
-                        ?.ifEmpty { null }
-                    password = System.getenv("SONATYPE_PASS")
-                        ?.trim()
-                        ?.ifEmpty { null }
-                }
+        issueManagement {
+            system = "Github"
+            url = "https://github.com/domgew/kedis/issues"
+        }
+        developers {
+            developer {
+                id = "domgew"
+                name = "domgew"
+                email = "44265359+domgew@users.noreply.github.com"
+                url = "https://github.com/domgew"
             }
         }
     }
 }
 
-signing {
-    useInMemoryPgpKeys(
-        System.getenv("GPG_PRIVATE_KEY"),
-        System.getenv("GPG_PRIVATE_PASSWORD"),
-    )
-    sign(publishing.publications)
-}
-
-// https://github.com/gradle/gradle/issues/26091
-val signingTasks = tasks.withType<Sign>()
-tasks.withType<AbstractPublishToMaven>().configureEach {
-    dependsOn(signingTasks)
-}
-
-// smartPublish as per https://github.com/Dominaezzz/kotlin-sqlite/blob/master/build.gradle.kts
 afterEvaluate {
     val testTasks = project.tasks.withType<AbstractTestTask>()
         .matching {
@@ -213,7 +173,13 @@ afterEvaluate {
                     throw Exception("unknown host")
             }
         }
-    val publishTasks = project.tasks.withType<PublishToMavenRepository>()
+    val publishTasks = when {
+        System.getenv("IS_CI") == "yes" ->
+            project.tasks.withType<PublishToMavenRepository>()
+
+        else ->
+            project.tasks.withType<PublishToMavenLocal>()
+    }
         .matching {
             when {
                 HostManager.hostIsMingw ->
@@ -232,27 +198,48 @@ afterEvaluate {
 
                 else -> throw Exception("unknown host")
             }
+                .and(
+                    if (System.getenv("IS_CI") == "yes") {
+                        it.name.endsWith("MavenCentralRepository")
+                    } else {
+                        it.name.endsWith("MavenLocal")
+                    },
+                )
         }
 
     if (System.getenv("IS_CI") == "yes") {
         println("#####################################")
         println("test tasks:")
-        for (task in project.tasks.withType<AbstractTestTask>()) {
+        val allTestTasks = project.tasks
+            .withType<AbstractTestTask>()
+            .sortedBy {
+                it.name
+            }
+        for (task in allTestTasks) {
             println("\t${task.name}")
         }
         println()
         println("smartTest tasks:")
-        for (task in testTasks) {
+        for (task in testTasks.sortedBy { it.name }) {
             println("\t${task.name}")
         }
         println("#####################################")
         println("publish tasks:")
-        for (task in project.tasks.withType<PublishToMavenRepository>()) {
+        val allPublishTasks = project.tasks
+            .withType<PublishToMavenLocal>()
+            .plus(
+                project.tasks
+                    .withType<PublishToMavenRepository>(),
+            )
+            .sortedBy {
+                it.name
+            }
+        for (task in allPublishTasks) {
             println("\t${task.name}")
         }
         println()
         println("smartPublish tasks:")
-        for (task in publishTasks) {
+        for (task in publishTasks.sortedBy { it.name }) {
             println("\t${task.name}")
         }
         println("#####################################")
