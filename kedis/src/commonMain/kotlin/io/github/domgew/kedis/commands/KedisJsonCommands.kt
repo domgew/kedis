@@ -1,10 +1,12 @@
 package io.github.domgew.kedis.commands
 
+import io.github.domgew.kedis.annotations.RedisModuleJson
 import io.github.domgew.kedis.arguments.json.JsonSetOptions
 import io.github.domgew.kedis.commands.json.JsonGetCommand
 import io.github.domgew.kedis.commands.json.JsonSetCommand
 import io.github.domgew.kedis.results.json.JsonSetResult
 
+@RedisModuleJson
 public object KedisJsonCommands {
 
     /**

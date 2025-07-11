@@ -1,5 +1,6 @@
 package io.github.domgew.kedis
 
+import io.github.domgew.kedis.annotations.RedisModuleJson
 import io.github.domgew.kedis.arguments.server.SyncOption
 import io.github.domgew.kedis.commands.KedisJsonCommands
 import io.github.domgew.kedis.commands.KedisServerCommands
@@ -16,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 
+@OptIn(RedisModuleJson::class)
 class JsonE2eTest {
 
     @Test
