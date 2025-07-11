@@ -2,12 +2,30 @@ package io.github.domgew.kedis.commands
 
 import io.github.domgew.kedis.annotations.RedisModuleJson
 import io.github.domgew.kedis.arguments.json.JsonSetOptions
+import io.github.domgew.kedis.commands.json.JsonDelCommand
 import io.github.domgew.kedis.commands.json.JsonGetCommand
 import io.github.domgew.kedis.commands.json.JsonSetCommand
+import io.github.domgew.kedis.commands.json.JsonToggleCommand
+import io.github.domgew.kedis.commands.json.JsonTypeCommand
 import io.github.domgew.kedis.results.json.JsonSetResult
 
 @RedisModuleJson
 public object KedisJsonCommands {
+
+    /**
+     * Deletes the values behind the [key]'s [path].
+     *
+     * [https://redis.io/commands/json.del/](https://redis.io/commands/json.del/)
+     * @return The number of deleted properties
+     */
+    public fun jsonDel(
+        key: String,
+        path: String? = null,
+    ): KedisCommand<Long?> =
+        JsonDelCommand(
+            key = key,
+            path = path,
+        )
 
     /**
      * Gets the JSON encoded values behind the key's paths.
@@ -49,5 +67,35 @@ public object KedisJsonCommands {
             path = path,
             value = value,
             options = options,
+        )
+
+    /**
+     * Toggles the values behind the [key]'s [path].
+     *
+     * [https://redis.io/commands/json.toggle/](https://redis.io/commands/json.toggle/)
+     * @return The new values or null if the type did not match
+     */
+    public fun jsonToggle(
+        key: String,
+        path: String,
+    ): KedisCommand<List<Boolean?>?> =
+        JsonToggleCommand(
+            key = key,
+            path = path,
+        )
+
+    /**
+     * Get the types of the values behind the [key]'s [path].
+     *
+     * [https://redis.io/commands/json.type/](https://redis.io/commands/json.type/)
+     * @return The JSON type names
+     */
+    public fun jsonType(
+        key: String,
+        path: String? = null,
+    ): KedisCommand<List<String>?> =
+        JsonTypeCommand(
+            key = key,
+            path = path,
         )
 }

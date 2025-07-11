@@ -85,7 +85,8 @@ class JsonE2eTest {
                                         "a": "test",
                                         "b": {
                                             "a": "some"
-                                        }
+                                        },
+                                        "t": true
                                     }
                                 """
                                     .trim()
@@ -115,6 +116,33 @@ class JsonE2eTest {
                                 paths = listOf(
                                     "$.a",
                                 ),
+                            ),
+                        ),
+                    )
+                    assertEquals(
+                        listOf("string"),
+                        client.execute(
+                            command = KedisJsonCommands.jsonType(
+                                key = key,
+                                path = "$.a",
+                            ),
+                        ),
+                    )
+                    assertEquals(
+                        listOf("object"),
+                        client.execute(
+                            command = KedisJsonCommands.jsonType(
+                                key = key,
+                                path = "$.b",
+                            ),
+                        ),
+                    )
+                    assertEquals(
+                        listOf("boolean"),
+                        client.execute(
+                            command = KedisJsonCommands.jsonType(
+                                key = key,
+                                path = "$.t",
                             ),
                         ),
                     )
@@ -160,6 +188,47 @@ class JsonE2eTest {
                     )
                     assertEquals(
                         "[\"someOther\"]",
+                        client.execute(
+                            KedisJsonCommands.jsonGet(
+                                key = key,
+                                indent = "",
+                                newLine = "",
+                                space = " ",
+                                paths = listOf(
+                                    "$.b.a",
+                                ),
+                            ),
+                        ),
+                    )
+                    assertEquals(
+                        listOf(false),
+                        client.execute(
+                            command = KedisJsonCommands.jsonToggle(
+                                key = key,
+                                path = "$.t",
+                            ),
+                        ),
+                    )
+                    assertEquals(
+                        listOf(null),
+                        client.execute(
+                            command = KedisJsonCommands.jsonToggle(
+                                key = key,
+                                path = "$.a",
+                            ),
+                        ),
+                    )
+                    assertEquals(
+                        1,
+                        client.execute(
+                            command = KedisJsonCommands.jsonDel(
+                                key = key,
+                                path = "$.b.a",
+                            ),
+                        ),
+                    )
+                    assertEquals(
+                        "[]",
                         client.execute(
                             KedisJsonCommands.jsonGet(
                                 key = key,
