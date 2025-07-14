@@ -13,7 +13,7 @@ logback = "1.5.18"
 
 dokka = "2.0.0"
 kover = "0.9.1"
-vanniktech-mavenPublish = "0.33.0"
+vanniktech-mavenPublish = "0.34.0"
 
 [libraries]
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
