@@ -284,7 +284,7 @@ class SimpleE2ETest {
                     assertEquals(
                         1L,
                         client.execute(
-                            command = KedisValueCommands.del(
+                            command = KedisValueCommands.unlink(
                                 key = arrayOf(testKey1),
                             ),
                         ),

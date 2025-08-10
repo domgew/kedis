@@ -23,6 +23,7 @@ import io.github.domgew.kedis.commands.value.SetBinaryCommand
 import io.github.domgew.kedis.commands.value.SetCommand
 import io.github.domgew.kedis.commands.value.StrLenCommand
 import io.github.domgew.kedis.commands.value.TtlCommand
+import io.github.domgew.kedis.commands.value.UnlinkCommand
 import io.github.domgew.kedis.results.value.ExpireTimeResult
 import io.github.domgew.kedis.results.value.SetBinaryResult
 import io.github.domgew.kedis.results.value.SetResult
@@ -308,5 +309,18 @@ public object KedisValueCommands {
         TtlCommand(
             key = key,
             inMilliseconds = inMilliseconds,
+        )
+
+    /**
+     * Unlinks the provided [key]s. If a key does not exist, no error is thrown.
+     *
+     * [https://redis.io/commands/unlink/](https://redis.io/commands/unlink/)
+     * @return The number of unlinked provided [key]s
+     */
+    public fun unlink(
+        vararg key: String,
+    ): KedisCommand<Long> =
+        UnlinkCommand(
+            keys = key.asList(),
         )
 }
