@@ -23,13 +23,23 @@ class RedisMessageTest {
                 value = "OK",
             ),
         )
-        val exception = assertFailsWith<RedisMessage.ParsingException> {
-            decodeFromString("+OK\r+OK\r\n")
-        }
-        assertContains(
-            exception.message
-                ?: "",
-            "LF",
+        testEncodeDecoding(
+            expectedEncoded = "+OK\rOK\r\n",
+            expected = RedisMessage.SimpleStringMessage(
+                value = "OK\rOK",
+            ),
+        )
+        testEncodeDecoding(
+            expectedEncoded = "+OK\nOK\r\n",
+            expected = RedisMessage.SimpleStringMessage(
+                value = "OK\nOK",
+            ),
+        )
+        testEncodeDecoding(
+            expectedEncoded = "+OK\n\rOK\r\n",
+            expected = RedisMessage.SimpleStringMessage(
+                value = "OK\n\rOK",
+            ),
         )
     }
 

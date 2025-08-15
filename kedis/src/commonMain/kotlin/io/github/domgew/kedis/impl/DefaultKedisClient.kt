@@ -77,5 +77,4 @@ internal class DefaultKedisClient(
                 command = command,
             )
         }
-
 }

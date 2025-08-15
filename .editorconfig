@@ -110,6 +110,7 @@ ij_kotlin_wrap_first_method_in_call_chain = false
 
 [{*.markdown,*.md}]
 insert_final_newline = true
+max_line_length = off
 ij_markdown_force_one_space_after_blockquote_symbol = true
 ij_markdown_force_one_space_after_header_symbol = true
 ij_markdown_force_one_space_after_list_bullet = true

@@ -120,6 +120,7 @@ internal class DefaultKedisPipelineClient(
                                 )
                             }
                         }
+
                         fun itemFailed(
                             th: Throwable,
                             item: Queued,

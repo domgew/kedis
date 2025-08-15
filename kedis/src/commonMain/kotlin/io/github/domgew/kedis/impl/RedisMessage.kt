@@ -36,8 +36,7 @@ internal sealed class RedisMessage {
 
             // "+OK\r\n" -> "OK"
             suspend fun parse(incoming: ByteReadChannel): SimpleStringMessage {
-                val bytes = readUntilCR(incoming)
-                verifyLFByte<SimpleStringMessage>(incoming)
+                val bytes = readUntilCRLF(incoming)
 
                 return SimpleStringMessage(
                     value = bytes.decodeToString(),
@@ -58,8 +57,7 @@ internal sealed class RedisMessage {
 
             // "-Error message\r\n" -> "Error message"
             suspend fun parse(incoming: ByteReadChannel): SimpleErrorMessage {
-                val bytes = readUntilCR(incoming)
-                verifyLFByte<SimpleErrorMessage>(incoming)
+                val bytes = readUntilCRLF(incoming)
 
                 return SimpleErrorMessage(
                     value = bytes.decodeToString(),
@@ -80,8 +78,7 @@ internal sealed class RedisMessage {
 
             // ":[<+|->]<value>\r\n" -> [+|-]value
             suspend fun parse(incoming: ByteReadChannel): IntegerMessage {
-                val bytes = readUntilCR(incoming)
-                verifyLFByte<IntegerMessage>(incoming)
+                val bytes = readUntilCRLF(incoming)
 
                 return IntegerMessage(
                     value = bytes.decodeToString()
@@ -279,8 +276,7 @@ internal sealed class RedisMessage {
 
             // ",[<+|->]<integral>[.<fractional>][<E|e>[sign]<exponent>]\r\n" -> [+|-]<value>
             suspend fun parse(incoming: ByteReadChannel): DoubleMessage {
-                val resultBytes = readUntilCR(incoming)
-                verifyLFByte<DoubleMessage>(incoming)
+                val resultBytes = readUntilCRLF(incoming)
 
                 return DoubleMessage(
                     value = when {
@@ -314,8 +310,7 @@ internal sealed class RedisMessage {
 
             // "([+|-]<number>\r\n" -> [+|-]<number>
             suspend fun parse(incoming: ByteReadChannel): BigNumberMessage {
-                val resultBytes = readUntilCR(incoming)
-                verifyLFByte<BigNumberMessage>(incoming)
+                val resultBytes = readUntilCRLF(incoming)
 
                 return BigNumberMessage(
                     value = resultBytes.decodeToString(),
@@ -524,9 +519,7 @@ internal sealed class RedisMessage {
                     value = result.toMap(),
                 )
             }
-
         }
-
     }
 
     sealed class ErrorMessage : RedisMessage() {
@@ -631,18 +624,28 @@ internal sealed class RedisMessage {
             } while (true)
         }
 
-        private suspend fun readUntilCR(
+        private suspend fun readUntilCRLF(
             incoming: ByteReadChannel,
         ): ByteArray {
             val result = ArrayList<Byte>()
             var currentByte: Byte
+            var lastByte: Byte? = null
 
             while (true) {
                 currentByte = incoming.readByte()
-                if (currentByte == CR_BYTE) {
+
+                if (
+                    currentByte == LF_BYTE
+                    && lastByte == CR_BYTE
+                ) {
                     break
                 }
-                result.add(currentByte)
+
+                if (lastByte != null) {
+                    result.add(lastByte)
+                }
+
+                lastByte = currentByte
             }
 
             return result.toByteArray()
@@ -651,8 +654,7 @@ internal sealed class RedisMessage {
         private suspend inline fun <reified T : RedisMessage> readLength(
             incoming: ByteReadChannel,
         ): Int {
-            val lengthBytes = readUntilCR(incoming)
-            verifyLFByte<T>(incoming)
+            val lengthBytes = readUntilCRLF(incoming)
 
             return lengthBytes.decodeToString()
                 .toInt()
