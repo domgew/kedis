@@ -1,5 +1,6 @@
 package io.github.domgew.kedis.results.scripting
 
+import io.github.domgew.kedis.KedisException
 import io.github.domgew.kedis.impl.RedisMessage
 import kotlinx.io.bytestring.ByteString
 import kotlinx.io.bytestring.decodeToString
@@ -107,11 +108,9 @@ public sealed interface DynamicResult {
                             .map { (key, value) ->
                                 fromMessage(
                                     message = key,
-                                )
-                                    .to(
-                                        fromMessage(
-                                            message = value,
-                                        ),
+                                ) to
+                                    fromMessage(
+                                        message = value,
                                     )
                             },
                     )
@@ -119,6 +118,11 @@ public sealed interface DynamicResult {
                 is RedisMessage.ErrorMessage ->
                     ErrorResult(
                         string = message.value,
+                    )
+
+                is RedisMessage.AttributesMessage ->
+                    throw KedisException.WrongResponseException(
+                        message = "Expected non-attribute message, but was attribute",
                     )
             }
     }

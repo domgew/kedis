@@ -25,7 +25,7 @@ object RedisUtil {
                 .writeTo(writeChannel)
             writeChannel.flush()
 
-            val createResult = RedisMessage.parse(readChannel)
+            val createResult = RedisMessage.readNonAttributes(readChannel)
 
             if (createResult is RedisMessage.ErrorMessage) {
                 throw Exception(createResult.value)
@@ -50,7 +50,7 @@ object RedisUtil {
                 .writeTo(writeChannel)
             writeChannel.flush()
 
-            val deleteResult = RedisMessage.parse(readChannel)
+            val deleteResult = RedisMessage.readNonAttributes(readChannel)
 
             assertIs<RedisMessage.IntegerMessage>(deleteResult)
             assertEquals(1, deleteResult.value)

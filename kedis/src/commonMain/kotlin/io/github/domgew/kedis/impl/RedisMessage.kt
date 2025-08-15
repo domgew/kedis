@@ -398,6 +398,7 @@ internal sealed class RedisMessage {
         }
 
         companion object {
+
             const val TYPE_BYTE: Byte = 37 // '%'
 
             private val NULL_ENTRY = Pair<RedisMessage, RedisMessage>(
@@ -408,7 +409,7 @@ internal sealed class RedisMessage {
             // "%<number-of-entries>\r\n<key-1><value-1>...<key-n><value-n>" -> {<key1>: <value-1>), ..., <key-n>: <value-n>}
             suspend fun parse(incoming: ByteReadChannel): MessageMapMessage {
                 val length = readLength<MessageMapMessage>(incoming)
-                val result = Array<Pair<RedisMessage, RedisMessage>>(length) { NULL_ENTRY }
+                val result = Array(length) { NULL_ENTRY }
                 for (i in 0 until length) {
                     val key = RedisMessage.parse(incoming)
                     val value = RedisMessage.parse(incoming)
@@ -484,6 +485,50 @@ internal sealed class RedisMessage {
         }
     }
 
+    data class AttributesMessage(
+        val value: Map<RedisMessage, RedisMessage>,
+    ) : RedisMessage() {
+
+        override suspend fun writeTo(
+            outgoing: ByteWriteChannel,
+        ) {
+            outgoing.writeFully("|${value.size}\r\n".encodeToByteArray())
+            for (item in value.entries) {
+                item.key.writeTo(outgoing)
+                item.value.writeTo(outgoing)
+            }
+        }
+
+        companion object {
+
+            const val TYPE_BYTE: Byte = 124 // '|'
+
+            private val NULL_ENTRY = Pair<RedisMessage, RedisMessage>(
+                NullMessage,
+                NullMessage,
+            )
+
+            // "|<number-of-entries>\r\n<key-1><value-1>...<key-n><value-n>" -> {<key1>: <value-1>), ..., <key-n>: <value-n>}
+            suspend fun parse(
+                incoming: ByteReadChannel,
+            ): AttributesMessage {
+                val length = readLength<MessageMapMessage>(incoming)
+                val result = Array(length) { NULL_ENTRY }
+                for (i in 0 until length) {
+                    val key = RedisMessage.parse(incoming)
+                    val value = RedisMessage.parse(incoming)
+                    result[i] = Pair(key, value)
+                }
+
+                return AttributesMessage(
+                    value = result.toMap(),
+                )
+            }
+
+        }
+
+    }
+
     sealed class ErrorMessage : RedisMessage() {
         abstract val value: String
     }
@@ -515,42 +560,75 @@ internal sealed class RedisMessage {
             this[1] = LF_BYTE
         }
 
-        suspend fun parse(incoming: ByteReadChannel): RedisMessage {
+        suspend fun parse(
+            incoming: ByteReadChannel,
+        ): RedisMessage {
             return when (
                 val typeByte = incoming.readByte()
             ) {
-                SimpleStringMessage.TYPE_BYTE -> SimpleStringMessage.parse(incoming)
+                SimpleStringMessage.TYPE_BYTE ->
+                    SimpleStringMessage.parse(incoming)
 
-                SimpleErrorMessage.TYPE_BYTE -> SimpleErrorMessage.parse(incoming)
+                SimpleErrorMessage.TYPE_BYTE ->
+                    SimpleErrorMessage.parse(incoming)
 
-                IntegerMessage.TYPE_BYTE -> IntegerMessage.parse(incoming)
+                IntegerMessage.TYPE_BYTE ->
+                    IntegerMessage.parse(incoming)
 
-                BulkStringMessage.TYPE_BYTE -> BulkStringMessage.parse(incoming)
+                BulkStringMessage.TYPE_BYTE ->
+                    BulkStringMessage.parse(incoming)
 
-                ArrayMessage.TYPE_BYTE -> ArrayMessage.parse(incoming)
+                ArrayMessage.TYPE_BYTE ->
+                    ArrayMessage.parse(incoming)
 
-                NullMessage.TYPE_BYTE -> NullMessage.parse(incoming)
+                NullMessage.TYPE_BYTE ->
+                    NullMessage.parse(incoming)
 
-                BooleanMessage.TYPE_BYTE -> BooleanMessage.parse(incoming)
+                BooleanMessage.TYPE_BYTE ->
+                    BooleanMessage.parse(incoming)
 
-                DoubleMessage.TYPE_BYTE -> DoubleMessage.parse(incoming)
+                DoubleMessage.TYPE_BYTE ->
+                    DoubleMessage.parse(incoming)
 
-                BigNumberMessage.TYPE_BYTE -> BigNumberMessage.parse(incoming)
+                BigNumberMessage.TYPE_BYTE ->
+                    BigNumberMessage.parse(incoming)
 
-                BulkErrorMessage.TYPE_BYTE -> BulkErrorMessage.parse(incoming)
+                BulkErrorMessage.TYPE_BYTE ->
+                    BulkErrorMessage.parse(incoming)
 
-                VerbatimStringMessage.TYPE_BYTE -> VerbatimStringMessage.parse(incoming)
+                VerbatimStringMessage.TYPE_BYTE ->
+                    VerbatimStringMessage.parse(incoming)
 
-                MessageMapMessage.TYPE_BYTE -> MessageMapMessage.parse(incoming)
+                MessageMapMessage.TYPE_BYTE ->
+                    MessageMapMessage.parse(incoming)
 
-                MessageSetMessage.TYPE_BYTE -> MessageSetMessage.parse(incoming)
+                MessageSetMessage.TYPE_BYTE ->
+                    MessageSetMessage.parse(incoming)
 
-                MessagePushMessage.TYPE_BYTE -> MessagePushMessage.parse(incoming)
+                MessagePushMessage.TYPE_BYTE ->
+                    MessagePushMessage.parse(incoming)
+
+                AttributesMessage.TYPE_BYTE ->
+                    AttributesMessage.parse(incoming)
 
                 else -> throw parsingException<RedisMessage>(
                     message = "Unknown message type: $typeByte",
                 )
             }
+        }
+
+        suspend fun readNonAttributes(
+            incoming: ByteReadChannel,
+        ): RedisMessage {
+            var message: RedisMessage
+
+            do {
+                message = parse(incoming)
+
+                if (message !is AttributesMessage) {
+                    return message
+                }
+            } while (true)
         }
 
         private suspend fun readUntilCR(
@@ -570,7 +648,9 @@ internal sealed class RedisMessage {
             return result.toByteArray()
         }
 
-        private suspend inline fun <reified T : RedisMessage> readLength(incoming: ByteReadChannel): Int {
+        private suspend inline fun <reified T : RedisMessage> readLength(
+            incoming: ByteReadChannel,
+        ): Int {
             val lengthBytes = readUntilCR(incoming)
             verifyLFByte<T>(incoming)
 

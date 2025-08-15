@@ -679,6 +679,48 @@ class RedisMessageTest {
     }
 
     @Test
+    fun attributesMessage() = runTest {
+        testEncodeDecoding(
+            expectedEncoded = "|1\r\n+key-popularity\r\n%2\r\n$1\r\na\r\n,0.1923\r\n$1\r\nb\r\n,0.0012\r\n",
+            expected = RedisMessage.AttributesMessage(
+                value = mapOf(
+                    RedisMessage.SimpleStringMessage(
+                        value = "key-popularity",
+                    ) to
+                        RedisMessage.MessageMapMessage(
+                            value = mapOf(
+                                RedisMessage.BulkStringMessage(
+                                    value = "a",
+                                ) to
+                                    RedisMessage.DoubleMessage(
+                                        value = 0.1923,
+                                    ),
+                                RedisMessage.BulkStringMessage(
+                                    value = "b",
+                                ) to
+                                    RedisMessage.DoubleMessage(
+                                        value = 0.0012,
+                                    ),
+                            ),
+                        ),
+                ),
+            ),
+        )
+    }
+
+    @Test
+    fun readNonAttributes() = runTest {
+        val result = RedisMessage.readNonAttributes(
+            incoming = ByteReadChannel(
+                "|1\r\n+key-popularity\r\n%2\r\n$1\r\na\r\n,0.1923\r\n$1\r\nb\r\n,0.0012\r\n+test\r\n",
+            ),
+        )
+
+        assertIs<RedisMessage.SimpleStringMessage>(result)
+        assertEquals("test", result.value)
+    }
+
+    @Test
     fun unknownMessageType() = runTest {
         val unknownType = '"'
         val typeByte = unknownType.code.toByte()

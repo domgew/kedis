@@ -136,7 +136,7 @@ internal class BaseKedisClient(
         command: KedisFullCommand<T>,
     ): T {
         commoniseNetworkExceptions {
-            val response = RedisMessage.parse(connection.readChannel)
+            val response = RedisMessage.readNonAttributes(connection.readChannel)
 
             return command.fromRedisResponse(
                 response = response,

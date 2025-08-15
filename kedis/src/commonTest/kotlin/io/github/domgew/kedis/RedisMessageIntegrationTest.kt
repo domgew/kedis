@@ -33,7 +33,7 @@ class RedisMessageIntegrationTest {
                 pingMessage.writeTo(writeChannel)
                 writeChannel.flush()
 
-                return@withConnectedSocket RedisMessage.parse(readChannel)
+                return@withConnectedSocket RedisMessage.readNonAttributes(readChannel)
             }
 
             assertIs<RedisMessage.BulkStringMessage>(pongMessage)
@@ -61,7 +61,7 @@ class RedisMessageIntegrationTest {
                 pingMessage.writeTo(writeChannel)
                 writeChannel.flush()
 
-                return@withConnectedSocket RedisMessage.parse(readChannel)
+                return@withConnectedSocket RedisMessage.readNonAttributes(readChannel)
             }
 
             assertIs<RedisMessage.BulkStringMessage>(pongMessage)
@@ -89,7 +89,7 @@ class RedisMessageIntegrationTest {
                 pingMessage.writeTo(writeChannel)
                 writeChannel.flush()
 
-                return@withConnectedSocket RedisMessage.parse(readChannel)
+                return@withConnectedSocket RedisMessage.readNonAttributes(readChannel)
             }
 
             assertIs<RedisMessage.BulkStringMessage>(pongMessage)
@@ -117,7 +117,7 @@ class RedisMessageIntegrationTest {
                 pingMessage.writeTo(writeChannel)
                 writeChannel.flush()
 
-                return@withConnectedSocket RedisMessage.parse(readChannel)
+                return@withConnectedSocket RedisMessage.readNonAttributes(readChannel)
             }
 
             assertIs<RedisMessage.BulkStringMessage>(pongMessage)
