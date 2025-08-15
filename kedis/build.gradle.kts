@@ -52,7 +52,6 @@ kotlin {
                 implementation(libs.kotlin.stdlib)
                 api(libs.kotlinx.coroutines.core)
                 implementation(libs.ktor.network)
-                api(libs.bignum)
             }
         }
         commonTest {

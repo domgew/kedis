@@ -1,6 +1,5 @@
 package io.github.domgew.kedis.impl
 
-import com.ionspin.kotlin.bignum.integer.BigInteger
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.InternalAPI
@@ -362,57 +361,43 @@ class RedisMessageTest {
         testEncodeDecoding(
             expectedEncoded = "(0\r\n",
             expected = RedisMessage.BigNumberMessage(
-                value = BigInteger.parseString(
-                    "0",
-                ),
+                value = "0",
             ),
         )
         testEncodeDecoding(
             expectedEncoded = "(1\r\n",
             expected = RedisMessage.BigNumberMessage(
-                value = BigInteger.parseString(
-                    "1",
-                ),
+                value = "1",
             ),
         )
         testEncodeDecoding(
             expectedEncoded = "(-1\r\n",
             expected = RedisMessage.BigNumberMessage(
-                value = BigInteger.parseString(
-                    "-1",
-                ),
+                value = "-1",
             ),
         )
         testDecoding(
             encodedInput = "(+1\r\n",
             expected = RedisMessage.BigNumberMessage(
-                value = BigInteger.parseString(
-                    "+1",
-                ),
+                value = "+1",
             ),
         )
         testEncodeDecoding(
             expectedEncoded = "(3492890328409238509324850943850943825024385\r\n",
             expected = RedisMessage.BigNumberMessage(
-                value = BigInteger.parseString(
-                    "3492890328409238509324850943850943825024385",
-                ),
+                value = "3492890328409238509324850943850943825024385",
             ),
         )
         testEncodeDecoding(
             expectedEncoded = "(-3492890328409238509324850943850943825024385\r\n",
             expected = RedisMessage.BigNumberMessage(
-                value = BigInteger.parseString(
-                    "-3492890328409238509324850943850943825024385",
-                ),
+                value = "-3492890328409238509324850943850943825024385",
             ),
         )
         testDecoding(
             encodedInput = "(+3492890328409238509324850943850943825024385\r\n",
             expected = RedisMessage.BigNumberMessage(
-                value = BigInteger.parseString(
-                    "+3492890328409238509324850943850943825024385",
-                ),
+                value = "+3492890328409238509324850943850943825024385",
             ),
         )
     }

@@ -1,6 +1,5 @@
 package io.github.domgew.kedis.impl
 
-import com.ionspin.kotlin.bignum.integer.BigInteger
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.readByte
@@ -304,10 +303,10 @@ internal sealed class RedisMessage {
     }
 
     data class BigNumberMessage(
-        val value: BigInteger,
+        val value: String,
     ) : NumericMessage() {
         override suspend fun writeTo(outgoing: ByteWriteChannel) {
-            outgoing.writeFully("(${value.toString(10)}\r\n".encodeToByteArray())
+            outgoing.writeFully("(${value}\r\n".encodeToByteArray())
         }
 
         companion object {
@@ -319,10 +318,7 @@ internal sealed class RedisMessage {
                 verifyLFByte<BigNumberMessage>(incoming)
 
                 return BigNumberMessage(
-                    value = BigInteger.parseString(
-                        string = resultBytes.decodeToString(),
-                        base = 10,
-                    ),
+                    value = resultBytes.decodeToString(),
                 )
             }
         }

@@ -1,6 +1,5 @@
 package io.github.domgew.kedis.results.scripting
 
-import com.ionspin.kotlin.bignum.integer.BigInteger
 import io.github.domgew.kedis.impl.RedisMessage
 import kotlinx.io.bytestring.ByteString
 import kotlinx.io.bytestring.decodeToString
@@ -40,7 +39,7 @@ public sealed interface DynamicResult {
     ) : SuccessResult
 
     public data class BigIntegerResult(
-        val value: BigInteger,
+        val value: String,
     ) : SuccessResult
 
     public data class ListLikeResult(
