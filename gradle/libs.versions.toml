@@ -9,7 +9,7 @@ bignum = "0.3.10"
 semVer = "2.1.0"
 
 kop = "0.0.5"
-logback = "1.5.18"
+logback = "1.5.19"
 
 dokka = "2.0.0"
 kover = "0.9.1"
