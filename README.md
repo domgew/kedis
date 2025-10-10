@@ -24,9 +24,13 @@ dependencies {
     // ...
 
     implementation("io.github.domgew:kedis:<current_version>")
+    // optional:
+    implementation("io.github.domgew:kedis-lock:<current_version>")
 
     // OR just for JVM:
     implementation("io.github.domgew:kedis-jvm:<current_version>")
+    // optional:
+    implementation("io.github.domgew:kedis-lock-jvm:<current_version>")
 
     // ...
 }
@@ -146,6 +150,49 @@ KotlinObjectPool(
             }
             ?: "NULL"
         println("Test value: $testValue")
+    }
+```
+
+### Distributed Lock (Redis Single Instance)
+
+```kotlin
+dependencies {
+    implementation("io.github.domgew:kedis-lock:<current_version>")
+}
+```
+
+```kotlin
+KedisClient.builder {
+    hostAndPort(
+        host = "127.0.0.1",
+    )
+    connectTimeout = 250.milliseconds
+}
+    .use { client ->
+        val locker = client.locker()
+
+        val dynamicLock = locker.asDynamicLock()
+        dynamicLock.withTryLock(
+            key = "my-lock",
+            maxLockFor = 10.seconds,
+            default = {
+                throw Exception("Lock not acquired")
+            },
+        ) {
+            println("Lock acquired")
+        }
+
+        val lock = locker.asLock(
+            key = "my-lock",
+        )
+        lock.withTryLock(
+            maxLockFor = 10.seconds,
+            default = {
+                throw Exception("Lock not acquired")
+            },
+        ) {
+            println("Lock acquired")
+        }
     }
 ```
 
