@@ -8,7 +8,7 @@ ktor = "3.3.3"
 bignum = "0.3.10"
 semVer = "2.1.0"
 
-kop = "0.0.6"
+kop = "0.0.7"
 logback = "1.5.25"
 
 dokka = "2.1.0"

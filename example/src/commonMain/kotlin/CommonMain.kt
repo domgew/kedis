@@ -4,8 +4,6 @@ import io.github.domgew.kedis.arguments.value.SetOptions
 import io.github.domgew.kedis.commands.KedisServerCommands
 import io.github.domgew.kedis.commands.KedisValueCommands
 import io.github.domgew.kop.KotlinObjectPool
-import io.github.domgew.kop.KotlinObjectPoolConfig
-import io.github.domgew.kop.KotlinObjectPoolStrategy
 import io.github.domgew.kop.withObject
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -20,14 +18,13 @@ import io.ktor.server.routing.patch
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
-import kotlin.coroutines.coroutineContext
+import io.ktor.utils.io.CancellationException
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
 
 fun commonMain() {
@@ -35,19 +32,18 @@ fun commonMain() {
         factory = CIO,
         port = 8080,
     ) {
-        val kedisPool = KotlinObjectPool(
-            KotlinObjectPoolConfig(
-                maxSize = 3,
-                keepAliveFor = 2.minutes,
-                strategy = KotlinObjectPoolStrategy.LIFO,
-            ),
-        ) {
-            println("kedisPool: Creating new instance")
-            KedisClient.builder {
-                hostAndPort("127.0.0.1", 6379)
-                noAutoAuth()
-                connectTimeout = 250.milliseconds
-                keepAlive = true
+        val kedisPool = KotlinObjectPool.build {
+            maxSize(3)
+            keepAliveFor(2.minutes)
+
+            createInstance {
+                println("kedisPool: Creating new instance")
+                KedisClient.builder {
+                    hostAndPort("127.0.0.1", 6379)
+                    noAutoAuth()
+                    connectTimeout = 250.milliseconds
+                    keepAlive = true
+                }
             }
         }
 
@@ -160,9 +156,10 @@ private suspend fun KedisClient.getOrCallback(
                 key = key,
             ),
         )
-    } catch (th: Throwable) {
-        coroutineContext.ensureActive()
-        println("KedisClient.getOrCallback: Could not get value from cache: ${th.message}")
+    } catch (ex: CancellationException) {
+        throw ex
+    } catch (ex: Exception) {
+        println("KedisClient.getOrCallback: Could not get value from cache: ${ex.message}")
         return Pair(false, block())
     }
 
@@ -186,9 +183,10 @@ private suspend fun KedisClient.getOrCallback(
                 ),
             ),
         )
-    } catch (th: Throwable) {
-        coroutineContext.ensureActive()
-        println("KedisClient.getOrCallback: Could not write value to cache: ${th.message}")
+    } catch (ex: Exception) {
+        throw ex
+    } catch (ex: Exception) {
+        println("KedisClient.getOrCallback: Could not write value to cache: ${ex.message}")
     }
 
     return Pair(false, value)
@@ -202,9 +200,10 @@ private suspend fun KedisClient.isAvailable(): Throwable? {
     try {
         connect()
         return null
-    } catch (th: Throwable) {
-        coroutineContext.ensureActive()
-        return th
+    } catch (ex: CancellationException) {
+        throw ex
+    } catch (ex: Exception) {
+        return ex
     }
 }
 
