@@ -63,7 +63,7 @@ jobs:
           ./gradlew kedis:smartTest
           ./gradlew kedis-lock:smartTest
       - name: Test reports for Redis 6 on ${{ matrix.os }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: test-${{ github.sha }}-${{ matrix.os }}-redis-6
@@ -82,7 +82,7 @@ jobs:
           ./gradlew kedis:smartTest
           ./gradlew kedis-lock:smartTest
       - name: Test reports for Redis 7 on ${{ matrix.os }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: test-${{ github.sha }}-${{ matrix.os }}-redis-7
