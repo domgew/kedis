@@ -3,7 +3,7 @@ kotlin = "2.3.20"
 
 kotlinx-coroutines = "1.10.2"
 
-ktor = "3.4.2"
+ktor = "3.4.3"
 
 bignum = "0.3.10"
 semVer = "2.1.0"
