@@ -14,13 +14,12 @@ import kotlin.contracts.InvocationKind
 import kotlin.contracts.contract
 import kotlin.time.Duration
 import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.internal.SynchronizedObject
 import kotlinx.coroutines.internal.synchronized
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 
 @OptIn(InternalCoroutinesApi::class)
 internal class KedisConnection(
@@ -95,20 +94,17 @@ internal class KedisConnection(
     }
 
     private suspend fun doConnect(): Connection {
-        val socket = try {
-            commoniseConnectException {
-                withTimeout(connectionTimeout) {
-                    aSocket(selectorManager)
-                        .tcp()
-                        .connect(
-                            remoteAddress = socketAddress,
-                        ) {
-                            keepAlive = this@KedisConnection.keepAlive
-                        }
-                }
+        val socket = commoniseConnectException {
+            withTimeoutOrNull(connectionTimeout) {
+                aSocket(selectorManager)
+                    .tcp()
+                    .connect(
+                        remoteAddress = socketAddress,
+                    ) {
+                        keepAlive = this@KedisConnection.keepAlive
+                    }
             }
-        } catch (_: TimeoutCancellationException) {
-            throw KedisException.ConnectionTimeoutException()
+                ?: throw KedisException.ConnectionTimeoutException()
         }
 
         val connection: Connection
