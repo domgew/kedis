@@ -1,5 +1,6 @@
 package io.github.domgew.kedis
 
+import io.ktor.network.selector.SelectorManager
 import kotlin.time.Duration
 
 @KedisDsl
@@ -112,6 +113,18 @@ public class KedisBuilder internal constructor() {
             _databaseIndex = value
         }
 
+    /**
+     * Configure the client's selector manager.
+     *
+     * The selector manager is not closed automatically.
+     */
+    public var selectorManager: SelectorManager
+        get() =
+            throw NotImplementedError("Write only")
+        set(value) {
+            _selectorManager = value
+        }
+
     private var _endpoint: KedisConfiguration.Endpoint? =
         null
     private var _authentication: KedisConfiguration.Authentication =
@@ -122,21 +135,37 @@ public class KedisBuilder internal constructor() {
         true
     private var _databaseIndex: Int =
         0
+    private var _selectorManager: SelectorManager? =
+        null
 
-    internal fun build(): KedisClient =
-        KedisClient.newClient(
-            configuration = KedisConfiguration(
-                endpoint = _endpoint
-                    ?: throw MissingConfig(
-                        what = "endpoint",
-                    ),
-                authentication = _authentication,
-                connectionTimeout = _connectTimeout
-                    ?: throw MissingConfig(
-                        what = "connectTimeout",
-                    ),
-                keepAlive = _keepAlive,
-                databaseIndex = _databaseIndex,
-            ),
+    internal fun build(): KedisClient {
+        val configuration = KedisConfiguration(
+            endpoint = _endpoint
+                ?: throw MissingConfig(
+                    what = "endpoint",
+                ),
+            authentication = _authentication,
+            connectionTimeout = _connectTimeout
+                ?: throw MissingConfig(
+                    what = "connectTimeout",
+                ),
+            keepAlive = _keepAlive,
+            databaseIndex = _databaseIndex,
         )
+
+        return when (
+            val selectorManager = _selectorManager
+        ) {
+            null ->
+                KedisClient.newClient(
+                    configuration = configuration,
+                )
+
+            else ->
+                KedisClient.newClient(
+                    configuration = configuration,
+                    selectorManager = selectorManager,
+                )
+        }
+    }
 }

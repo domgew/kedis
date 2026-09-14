@@ -1,14 +1,10 @@
 package io.github.domgew.kedis
 
-import io.github.domgew.kedis.KedisClient.Companion.builder
-import io.github.domgew.kedis.KedisClient.Companion.invoke
-import io.github.domgew.kedis.KedisClient.Companion.newClient
 import io.github.domgew.kedis.commands.KedisCommand
 import io.github.domgew.kedis.commands.KedisServerCommands
 import io.github.domgew.kedis.impl.DefaultKedisClient
+import io.github.domgew.kedis.impl.ManagedSelectorKedisClient
 import io.ktor.network.selector.SelectorManager
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 
 /**
  * The public interface of the client.
@@ -36,11 +32,28 @@ public interface KedisClient : AutoCloseable {
         public fun newClient(
             configuration: KedisConfiguration,
         ): KedisClient =
-            newClient(
+            ManagedSelectorKedisClient(
                 configuration = configuration,
-                selectorManager = SelectorManager(
-                    Dispatchers.IO,
-                ),
+            )
+
+        /**
+         * Creates a new client instance without connecting.
+         *
+         * When you connect the client, make sure to disconnect/[close] it again.
+         * Each command (method) will connect automatically, when the connection is not already open.
+         * 
+         * The [selectorManager] is not closed automatically.
+         *
+         * @see invoke
+         * @see builder
+         */
+        public fun newClient(
+            configuration: KedisConfiguration,
+            selectorManager: SelectorManager,
+        ): KedisClient =
+            DefaultKedisClient(
+                configuration = configuration,
+                selectorManager = selectorManager,
             )
 
         /**
@@ -64,6 +77,26 @@ public interface KedisClient : AutoCloseable {
          *
          * When you connect the client, make sure to disconnect/[close] it again.
          * Each command (method) will connect automatically, when the connection is not already open.
+         * 
+         * The [selectorManager] is not closed automatically.
+         *
+         * @see newClient
+         * @see builder
+         */
+        public operator fun invoke(
+            configuration: KedisConfiguration,
+            selectorManager: SelectorManager,
+        ): KedisClient =
+            newClient(
+                configuration = configuration,
+                selectorManager = selectorManager,
+            )
+
+        /**
+         * Creates a new client instance without connecting.
+         *
+         * When you connect the client, make sure to disconnect/[close] it again.
+         * Each command (method) will connect automatically, when the connection is not already open.
          *
          * @see newClient
          * @see invoke
@@ -77,15 +110,6 @@ public interface KedisClient : AutoCloseable {
                     it.config()
                 }
                 .build()
-
-        internal fun newClient(
-            configuration: KedisConfiguration,
-            selectorManager: SelectorManager,
-        ) =
-            DefaultKedisClient(
-                configuration = configuration,
-                selectorManager = selectorManager,
-            )
     }
 
     /**

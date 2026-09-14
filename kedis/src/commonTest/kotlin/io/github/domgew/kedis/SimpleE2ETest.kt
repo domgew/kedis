@@ -12,6 +12,7 @@ import io.github.domgew.kedis.results.value.SetResult
 import io.github.domgew.kedis.results.value.TtlResult
 import io.github.domgew.kedis.utils.TestConfigUtil
 import io.github.domgew.kedis.utils.getRedisVersion
+import io.ktor.network.selector.SelectorManager
 import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -24,15 +25,14 @@ import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
 import kotlin.time.TimeSource
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import net.swiftzer.semver.SemVer
 
-@OptIn(ExperimentalTime::class)
 class SimpleE2ETest {
 
     @Test
@@ -56,6 +56,37 @@ class SimpleE2ETest {
                             content = pingContent,
                         ),
                     )
+                }
+
+            assertEquals(pingContent, pongMessage)
+        }
+    }
+
+    @Test
+    fun ping_customSelectorManager() = runTest {
+        withContext(Dispatchers.Default) {
+            val pingContent = "_TEST_"
+
+            val pongMessage = SelectorManager(Dispatchers.IO)
+                .use { selectorManager ->
+                    KedisClient.newClient(
+                        selectorManager = selectorManager,
+                        configuration = KedisConfiguration(
+                            endpoint = KedisConfiguration.Endpoint.HostPort(
+                                host = "127.0.0.1",
+                                port = TestConfigUtil.getPort(),
+                            ),
+                            authentication = KedisConfiguration.Authentication.NoAutoAuth,
+                            connectionTimeout = 2.seconds,
+                        ),
+                    )
+                        .use { client ->
+                            client.execute(
+                                command = KedisServerCommands.ping(
+                                    content = pingContent,
+                                ),
+                            )
+                        }
                 }
 
             assertEquals(pingContent, pongMessage)

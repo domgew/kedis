@@ -51,7 +51,7 @@ kotlin {
             dependencies {
                 implementation(libs.kotlin.stdlib)
                 api(libs.kotlinx.coroutines.core)
-                implementation(libs.ktor.network)
+                api(libs.ktor.network)
             }
         }
         commonTest {
