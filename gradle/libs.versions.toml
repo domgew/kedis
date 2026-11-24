@@ -5,7 +5,7 @@ kotlinx-coroutines = "1.11.0"
 
 ktor = "3.6.1"
 
-bignum = "0.3.10"
+bignum = "0.4.0"
 semVer = "2.1.0"
 
 kop = "0.0.9"
